@@ -1,0 +1,13 @@
+Deployment Information
+=====================
+Date: Mon Nov 10 22:38:21 PST 2025
+Backend URL: http://100.27.225.93
+S3 Bucket: stonkmarketanalyzer-frontend-1762843094
+CloudFront Distribution ID: E2UZFZ0XAK8XWJ
+CloudFront Domain: https://d3manxs3wrxea.cloudfront.net
+Region: us-east-1
+
+Frontend URL: https://d3manxs3wrxea.cloudfront.net
+Backend API: http://100.27.225.93/api/health
+
+Note: CloudFront distribution takes 15-20 minutes to deploy globally.

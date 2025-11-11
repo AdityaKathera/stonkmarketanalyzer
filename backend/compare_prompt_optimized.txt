@@ -1,0 +1,14 @@
+Compare {ticker_list} stocks. Be concise. Return ONLY valid JSON (no markdown, no code blocks):
+{{
+  "summary": "1-2 sentence comparison",
+  "stocks": [
+    {{
+      "ticker": "TICKER",
+      "recommendation": "Buy/Hold/Sell",
+      "risk": "Low/Medium/High",
+      "growth": "Low/Medium/High",
+      "highlights": ["brief point 1", "brief point 2", "brief point 3"]
+    }}
+  ],
+  "winner": "1 sentence: which stock is best and why"
+}}

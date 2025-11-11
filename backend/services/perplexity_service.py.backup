@@ -1,0 +1,75 @@
+import requests
+import json
+
+class PerplexityService:
+    """Service for interacting with Perplexity AI API"""
+    
+    def __init__(self, api_key):
+        self.api_key = api_key
+        self.base_url = "https://api.perplexity.ai/chat/completions"
+        self.model = "sonar-pro"  # Model with online search
+    
+    def query(self, prompt, model=None):
+        """
+        Send a query to Perplexity AI
+        
+        Args:
+            prompt: The prompt to send
+            model: Optional model override
+            
+        Returns:
+            dict with 'content' and 'citations'
+        """
+        if not self.api_key:
+            raise ValueError("Perplexity API key is not configured")
+        
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json"
+        }
+        
+        payload = {
+            "model": model or self.model,
+            "messages": [
+                {
+                    "role": "system",
+                    "content": "You are a professional equity research analyst with access to real-time market data. Always use the most current, up-to-date information available. Include today's date and current stock prices in your analysis. Provide detailed, data-driven analysis with citations and dates."
+                },
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ],
+            "temperature": 0.2  # Lower temperature for more factual responses
+        }
+        
+        try:
+            response = requests.post(
+                self.base_url,
+                headers=headers,
+                json=payload,
+                timeout=60
+            )
+            
+            # Print response for debugging
+            print(f"Status Code: {response.status_code}")
+            print(f"Response: {response.text}")
+            
+            response.raise_for_status()
+            
+            data = response.json()
+            
+            # Extract content and citations
+            content = data['choices'][0]['message']['content']
+            citations = data.get('citations', [])
+            
+            return {
+                'content': content,
+                'citations': citations
+            }
+            
+        except requests.exceptions.RequestException as e:
+            print(f"Request error: {str(e)}")
+            if hasattr(e.response, 'text'):
+                print(f"Error response: {e.response.text}")
+            raise Exception(f"Perplexity API error: {str(e)}")
