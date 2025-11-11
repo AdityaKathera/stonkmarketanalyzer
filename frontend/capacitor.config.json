@@ -1,5 +1,8 @@
 {
   "appId": "com.adityakathera.stonkanalyzer",
   "appName": "Stonk Market Analyzer",
-  "webDir": "dist"
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  }
 }
