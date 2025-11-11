@@ -3,7 +3,6 @@
   "appName": "Stonk Market Analyzer",
   "webDir": "dist",
   "server": {
-    "androidScheme": "https",
-    "cleartext": true
+    "androidScheme": "https"
   }
 }
