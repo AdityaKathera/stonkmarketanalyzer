@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Stonk Market Analyzer</string>
+    <string name="title_activity_main">Stonk Market Analyzer</string>
+    <string name="package_name">com.adityakathera.stonkanalyzer</string>
+    <string name="custom_url_scheme">com.adityakathera.stonkanalyzer</string>
+</resources>
