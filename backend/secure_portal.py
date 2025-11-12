@@ -414,4 +414,73 @@ def setup_portal_routes(app, analytics_service):
         except Exception as e:
             return jsonify({'error': str(e)}), 500
     
+    @app.route(f'/api/{PORTAL_PATH}/analytics/revenue', methods=['GET'])
+    @require_auth
+    def portal_revenue_metrics():
+        """Get revenue and usage metrics"""
+        try:
+            date = request.args.get('date')
+            metrics = analytics_service.get_revenue_metrics(date)
+            return jsonify(metrics), 200
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+    
+    @app.route(f'/api/{PORTAL_PATH}/analytics/peak-hours', methods=['GET'])
+    @require_auth
+    def portal_peak_hours():
+        """Get peak usage hours"""
+        try:
+            date = request.args.get('date')
+            peak_hours = analytics_service.get_peak_usage_hours(date)
+            return jsonify({'peak_hours': peak_hours}), 200
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+    
+    @app.route(f'/api/{PORTAL_PATH}/analytics/user-behavior', methods=['GET'])
+    @require_auth
+    def portal_user_behavior():
+        """Get user behavior analytics"""
+        try:
+            date = request.args.get('date')
+            behavior = analytics_service.get_user_behavior(date)
+            return jsonify(behavior), 200
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+    
+    @app.route(f'/api/{PORTAL_PATH}/system/health-full', methods=['GET'])
+    @require_auth
+    def portal_system_health_full():
+        """Get comprehensive system health"""
+        try:
+            health = analytics_service.get_system_health()
+            return jsonify(health), 200
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+    
+    @app.route(f'/api/{PORTAL_PATH}/analytics/weekly-trend', methods=['GET'])
+    @require_auth
+    def portal_weekly_trend():
+        """Get weekly trend data"""
+        try:
+            days = int(request.args.get('days', 7))
+            trend = analytics_service.get_weekly_trend(days)
+            return jsonify({'trend': trend}), 200
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+    
+    @app.route(f'/api/{PORTAL_PATH}/cache/clear', methods=['POST'])
+    @require_auth
+    def portal_cache_clear():
+        """Clear cache (admin action)"""
+        try:
+            # Import cache if available
+            try:
+                from cache import response_cache
+                response_cache.clear()
+                return jsonify({'success': True, 'message': 'Cache cleared'}), 200
+            except:
+                return jsonify({'error': 'Cache not available'}), 404
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+    
     return PORTAL_PATH, PORTAL_USERNAME

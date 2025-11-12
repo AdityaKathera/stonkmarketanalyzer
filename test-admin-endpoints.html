@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Admin Endpoints</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #1a1a2e; color: #e0e0e0; }
+        button { padding: 10px 20px; margin: 5px; background: #667eea; color: white; border: none; cursor: pointer; }
+        button:hover { background: #764ba2; }
+        pre { background: #2a2a3e; padding: 15px; border-radius: 5px; overflow-x: auto; }
+        .success { color: #4ade80; }
+        .error { color: #f87171; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Admin Endpoint Tester</h1>
+    
+    <div>
+        <h3>1. Login First:</h3>
+        <button onclick="login()">Login</button>
+        <span id="loginStatus"></span>
+    </div>
+    
+    <div>
+        <h3>2. Test Endpoints:</h3>
+        <button onclick="testActivity()">📊 Activity Feed</button>
+        <button onclick="testPerformance()">⚡ Performance</button>
+        <button onclick="testErrors()">🐛 Errors</button>
+        <button onclick="testHourly()">📈 Hourly Stats</button>
+        <button onclick="testFeatures()">🎯 Features</button>
+        <button onclick="testRetention()">📉 Retention</button>
+        <button onclick="testCache()">💾 Cache Stats</button>
+        <button onclick="exportCSV()">📥 Export CSV</button>
+    </div>
+    
+    <h3>Response:</h3>
+    <pre id="output">Click a button to test...</pre>
+    
+    <script>
+        const API_URL = 'https://api.stonkmarketanalyzer.com';
+        const PORTAL_PATH = 'iITXdYyGypK6';
+        let token = localStorage.getItem('admin_token');
+        
+        async function login() {
+            try {
+                const response = await fetch(`${API_URL}/api/${PORTAL_PATH}/auth`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: 'sentinel_65d3d147',
+                        password: 'TempAdmin2025!'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.token) {
+                    token = data.token;
+                    localStorage.setItem('admin_token', token);
+                    document.getElementById('loginStatus').innerHTML = '<span class="success">✅ Logged in!</span>';
+                } else {
+                    document.getElementById('loginStatus').innerHTML = '<span class="error">❌ Login failed</span>';
+                }
+            } catch (e) {
+                document.getElementById('loginStatus').innerHTML = '<span class="error">❌ Error: ' + e.message + '</span>';
+            }
+        }
+        
+        async function testEndpoint(endpoint, name) {
+            if (!token) {
+                document.getElementById('output').textContent = '❌ Please login first!';
+                return;
+            }
+            
+            document.getElementById('output').textContent = `Loading ${name}...`;
+            
+            try {
+                const response = await fetch(`${API_URL}/api/${PORTAL_PATH}${endpoint}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                const data = await response.json();
+                document.getElementById('output').textContent = JSON.stringify(data, null, 2);
+            } catch (e) {
+                document.getElementById('output').textContent = '❌ Error: ' + e.message;
+            }
+        }
+        
+        function testActivity() { testEndpoint('/analytics/activity?limit=10', 'Activity Feed'); }
+        function testPerformance() { testEndpoint('/analytics/performance', 'Performance Stats'); }
+        function testErrors() { testEndpoint('/analytics/errors?limit=10', 'Recent Errors'); }
+        function testHourly() { testEndpoint('/analytics/hourly', 'Hourly Stats'); }
+        function testFeatures() { testEndpoint('/analytics/features', 'Feature Usage'); }
+        function testRetention() { testEndpoint('/analytics/retention?days=7', 'User Retention'); }
+        function testCache() { testEndpoint('/cache/stats', 'Cache Stats'); }
+        
+        function exportCSV() {
+            if (!token) {
+                alert('Please login first!');
+                return;
+            }
+            window.open(`${API_URL}/api/${PORTAL_PATH}/analytics/export?date=${new Date().toISOString().split('T')[0]}`, '_blank');
+        }
+        
+        // Auto-login if token exists
+        if (token) {
+            document.getElementById('loginStatus').innerHTML = '<span class="success">✅ Token found</span>';
+        }
+    </script>
+</body>
+</html>
