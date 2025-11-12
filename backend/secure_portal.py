@@ -322,4 +322,96 @@ def setup_portal_routes(app, analytics_service):
         except Exception as e:
             return jsonify({'error': str(e)}), 500
     
+    @app.route(f'/api/{PORTAL_PATH}/analytics/activity', methods=['GET'])
+    @require_auth
+    def portal_recent_activity():
+        """Get recent activity feed"""
+        try:
+            limit = int(request.args.get('limit', 50))
+            activity = analytics_service.get_recent_activity(limit)
+            return jsonify({'activity': activity}), 200
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+    
+    @app.route(f'/api/{PORTAL_PATH}/analytics/performance', methods=['GET'])
+    @require_auth
+    def portal_performance():
+        """Get performance statistics"""
+        try:
+            stats = analytics_service.get_performance_stats()
+            return jsonify(stats), 200
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+    
+    @app.route(f'/api/{PORTAL_PATH}/analytics/errors', methods=['GET'])
+    @require_auth
+    def portal_errors():
+        """Get recent errors"""
+        try:
+            limit = int(request.args.get('limit', 20))
+            errors = analytics_service.get_recent_errors(limit)
+            return jsonify({'errors': errors}), 200
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+    
+    @app.route(f'/api/{PORTAL_PATH}/analytics/hourly', methods=['GET'])
+    @require_auth
+    def portal_hourly():
+        """Get hourly breakdown"""
+        try:
+            date = request.args.get('date')
+            hourly = analytics_service.get_hourly_stats(date)
+            return jsonify({'hourly': hourly}), 200
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+    
+    @app.route(f'/api/{PORTAL_PATH}/analytics/features', methods=['GET'])
+    @require_auth
+    def portal_features():
+        """Get feature usage"""
+        try:
+            date = request.args.get('date')
+            features = analytics_service.get_feature_usage(date)
+            return jsonify({'features': features}), 200
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+    
+    @app.route(f'/api/{PORTAL_PATH}/analytics/retention', methods=['GET'])
+    @require_auth
+    def portal_retention():
+        """Get user retention data"""
+        try:
+            days = int(request.args.get('days', 7))
+            retention = analytics_service.get_user_retention(days)
+            return jsonify({'retention': retention}), 200
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+    
+    @app.route(f'/api/{PORTAL_PATH}/analytics/export', methods=['GET'])
+    @require_auth
+    def portal_export():
+        """Export analytics as CSV"""
+        try:
+            date = request.args.get('date')
+            csv_data = analytics_service.export_to_csv(date)
+            
+            from flask import Response
+            return Response(
+                csv_data,
+                mimetype='text/csv',
+                headers={'Content-Disposition': f'attachment; filename=analytics_{date or "today"}.csv'}
+            )
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+    
+    @app.route(f'/api/{PORTAL_PATH}/cache/stats', methods=['GET'])
+    @require_auth
+    def portal_cache_stats():
+        """Get cache statistics"""
+        try:
+            stats = analytics_service.get_cache_stats()
+            return jsonify(stats), 200
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+    
     return PORTAL_PATH, PORTAL_USERNAME
