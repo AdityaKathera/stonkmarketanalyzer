@@ -38,8 +38,21 @@ function App() {
           <div className="header-left">
             <div className="logo">
               <div className="logo-icon">
-                <span className="logo-rocket">🚀</span>
-                <span className="logo-chart">📊</span>
+                {/* Replace logo.png with your actual logo filename */}
+                <img 
+                  src="/logo.png" 
+                  alt="Stonk Market Analyzer Logo" 
+                  className="logo-image"
+                  onError={(e) => {
+                    // Fallback to emoji if image not found
+                    e.target.style.display = 'none';
+                    e.target.nextElementSibling.style.display = 'flex';
+                  }}
+                />
+                <div className="logo-emoji-fallback" style={{display: 'none'}}>
+                  <span className="logo-rocket">🚀</span>
+                  <span className="logo-chart">📊</span>
+                </div>
               </div>
               <div className="logo-text">
                 <h1>STONK MARKET ANALYZER</h1>
