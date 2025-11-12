@@ -12,6 +12,7 @@ from analytics_comprehensive import ComprehensiveAnalytics
 from secure_portal import setup_portal_routes
 from cache import SimpleCache
 from cache_enhanced import EnhancedCache
+from auth_routes import auth_bp
 import time
 from functools import wraps
 
@@ -22,6 +23,9 @@ app = Flask(__name__)
 # Configure CORS with environment-based origins
 allowed_origins = os.getenv('ALLOWED_ORIGINS', 'http://localhost:5173').split(',')
 CORS(app, origins=allowed_origins)
+
+# Register authentication blueprint
+app.register_blueprint(auth_bp)
 
 perplexity_service = PerplexityService(os.getenv('PERPLEXITY_API_KEY'))
 # Use comprehensive analytics for admin portal

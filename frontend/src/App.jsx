@@ -3,19 +3,36 @@ import ChatInterface from './components/ChatInterface'
 import ResearchFlow from './components/ResearchFlow'
 import StockComparison from './components/StockComparison'
 import Watchlist from './components/Watchlist'
+import Portfolio from './components/Portfolio'
+import AuthModal from './components/AuthModal'
 import analytics from './analytics'
 import './App.css'
 
 function App() {
-  const [mode, setMode] = useState('guided') // 'guided', 'chat', 'compare', 'watchlist'
+  const [mode, setMode] = useState('guided') // 'guided', 'chat', 'compare', 'watchlist', 'portfolio'
   const [ticker, setTicker] = useState('')
   const [horizon, setHorizon] = useState('1-3 years')
   const [riskLevel, setRiskLevel] = useState('moderate')
   const [darkMode, setDarkMode] = useState(false)
+  const [user, setUser] = useState(null)
+  const [showAuthModal, setShowAuthModal] = useState(false)
 
-  // Track page view on mount
+  // Track page view on mount and check for existing auth
   useEffect(() => {
     analytics.trackPageView('home');
+    
+    // Check for existing auth token
+    const token = localStorage.getItem('auth_token');
+    const savedUser = localStorage.getItem('user');
+    
+    if (token && savedUser) {
+      try {
+        setUser(JSON.parse(savedUser));
+      } catch (e) {
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('user');
+      }
+    }
   }, []);
 
   // Keyboard shortcuts
@@ -60,6 +77,20 @@ function App() {
     analytics.trackSettings('dark_mode', newMode);
   };
 
+  // Handle authentication success
+  const handleAuthSuccess = (userData) => {
+    setUser(userData);
+    setShowAuthModal(false);
+  };
+
+  // Handle logout
+  const handleLogout = () => {
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('user');
+    setUser(null);
+    setMode('guided');
+  };
+
   return (
     <div className={`app ${darkMode ? 'dark-mode' : ''}`}>
       <header className="app-header">
@@ -94,13 +125,27 @@ function App() {
               </div>
             </div>
           </div>
-          <button 
-            className="theme-toggle" 
-            onClick={handleDarkModeToggle}
-            aria-label="Toggle dark mode"
-          >
-            {darkMode ? '☀️' : '🌙'}
-          </button>
+          <div className="header-actions">
+            {user ? (
+              <div className="user-menu">
+                <span className="user-name">👤 {user.name || user.email}</span>
+                <button className="logout-btn" onClick={handleLogout}>
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <button className="login-btn" onClick={() => setShowAuthModal(true)}>
+                Sign In
+              </button>
+            )}
+            <button 
+              className="theme-toggle" 
+              onClick={handleDarkModeToggle}
+              aria-label="Toggle dark mode"
+            >
+              {darkMode ? '☀️' : '🌙'}
+            </button>
+          </div>
         </div>
       </header>
 
@@ -160,6 +205,14 @@ function App() {
           >
             ⭐ Watchlist
           </button>
+          {user && (
+            <button
+              className={mode === 'portfolio' ? 'active' : ''}
+              onClick={() => handleModeChange('portfolio')}
+            >
+              💼 Portfolio
+            </button>
+          )}
         </div>
       </div>
 
@@ -176,7 +229,16 @@ function App() {
         {mode === 'watchlist' && (
           <Watchlist onSelectStock={(t) => { setTicker(t); setMode('guided'); }} />
         )}
+        {mode === 'portfolio' && user && (
+          <Portfolio user={user} />
+        )}
       </main>
+
+      <AuthModal 
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onSuccess={handleAuthSuccess}
+      />
     </div>
   )
 }
