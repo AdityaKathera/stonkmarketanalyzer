@@ -221,6 +221,16 @@ export default function ResearchFlow({ ticker, horizon, riskLevel }) {
 
         {!loading && currentResult && (
           <div className="result-container">
+            {/* Cache indicator */}
+            {currentResult.cached && (
+              <div className="cache-indicator-banner">
+                <span className="cache-icon">⚡</span>
+                <span className="cache-text">
+                  <strong>Instant Result!</strong> This analysis was cached and loaded in under 1 second.
+                </span>
+              </div>
+            )}
+            
             {paramsChanged && (
               <div className="ticker-change-banner">
                 <div className="ticker-change-content">
