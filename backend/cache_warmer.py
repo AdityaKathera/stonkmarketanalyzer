@@ -89,26 +89,23 @@ class SecureCacheWarmer:
         """
         Get list of popular stocks to cache
         Security: Hardcoded list to prevent injection attacks
+        Focus on top 20 most popular stocks for faster caching
         """
         return [
-            # Tech Giants
+            # Top Tech Giants (most popular)
             'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'NVDA', 'TSLA',
-            # Finance
-            'JPM', 'BAC', 'WFC', 'GS', 'MS',
-            # Healthcare
-            'JNJ', 'UNH', 'PFE', 'ABBV', 'TMO',
-            # Consumer
-            'WMT', 'HD', 'DIS', 'NKE', 'SBUX',
-            # Industrial
-            'BA', 'CAT', 'GE', 'MMM', 'HON',
-            # Energy
-            'XOM', 'CVX', 'COP', 'SLB',
-            # Telecom
-            'T', 'VZ', 'TMUS',
-            # Crypto-related
-            'COIN', 'MSTR',
+            # Top Finance
+            'JPM', 'BAC', 'V', 'MA',
+            # Top Healthcare
+            'JNJ', 'UNH',
+            # Top Consumer
+            'WMT', 'HD', 'DIS',
+            # Top Industrial
+            'BA',
+            # Top Energy
+            'XOM',
             # Popular ETFs
-            'SPY', 'QQQ', 'VOO', 'VTI', 'IWM'
+            'SPY', 'QQQ'
         ]
     
     def get_priority_steps(self) -> List[str]:
@@ -116,15 +113,25 @@ class SecureCacheWarmer:
         Get research steps to cache (most commonly used)
         Security: Validated against available templates
         """
-        priority_steps = ['overview', 'fundamentals', 'news', 'technical']
+        # Get all available steps from templates
+        all_steps = list(prompt_templates.keys())
         
-        # Validate steps exist in templates
-        valid_steps = [step for step in priority_steps if step in prompt_templates]
+        # Priority order (most commonly used first)
+        priority_order = ['overview', 'financials', 'valuation', 'moat', 'risks', 'investment_advice', 'memo']
         
-        if len(valid_steps) != len(priority_steps):
-            logger.warning(f"Some steps not found in templates: {set(priority_steps) - set(valid_steps)}")
+        # Sort steps by priority, then alphabetically
+        sorted_steps = []
+        for step in priority_order:
+            if step in all_steps:
+                sorted_steps.append(step)
         
-        return valid_steps
+        # Add any remaining steps
+        for step in all_steps:
+            if step not in sorted_steps:
+                sorted_steps.append(step)
+        
+        logger.info(f"Caching {len(sorted_steps)} steps: {', '.join(sorted_steps)}")
+        return sorted_steps
     
     def warm_stock(self, ticker: str, step: str) -> Dict:
         """
