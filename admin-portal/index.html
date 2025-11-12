@@ -582,43 +582,55 @@
 
         async function loadRecentActivity() {
             try {
-                const response = await fetch(`${API_URL}/api/${PORTAL_PATH}/analytics/activity?limit=30`, {
+                const response = await fetch(`${API_URL}/api/${PORTAL_PATH}/analytics/activity?limit=50`, {
                     headers: { 'Authorization': `Bearer ${authToken}` }
                 });
                 const data = await response.json();
                 
                 const feed = document.getElementById('activityFeed');
                 if (data.activity && data.activity.length > 0) {
-                    feed.innerHTML = data.activity.map(item => {
-                        // Check if it's formatted activity or raw event
-                        if (item.description) {
-                            return `
-                                <div style="padding: 12px; border-bottom: 1px solid #3a3a4e; font-size: 0.9rem;">
-                                    <div style="font-weight: 500;">${item.description}</div>
-                                    <div style="color: #888; font-size: 0.8rem; margin-top: 4px;">
-                                        ${new Date(item.timestamp).toLocaleString()} • User: ${item.userId || 'anonymous'}
+                    // Filter out noise events on frontend
+                    const noiseEvents = ['page_hidden', 'page_visible', 'heartbeat', 'page_view', 'visibility_change'];
+                    const filteredActivity = data.activity.filter(item => {
+                        const eventType = item.event || item.details?.event || '';
+                        return !noiseEvents.includes(eventType);
+                    });
+                    
+                    if (filteredActivity.length > 0) {
+                        feed.innerHTML = filteredActivity.slice(0, 30).map(item => {
+                            // Check if it's formatted activity or raw event
+                            if (item.description) {
+                                return `
+                                    <div style="padding: 12px; border-bottom: 1px solid #3a3a4e; font-size: 0.9rem;">
+                                        <div style="font-weight: 500;">${item.description}</div>
+                                        <div style="color: #888; font-size: 0.8rem; margin-top: 4px;">
+                                            ${new Date(item.timestamp).toLocaleString()} • User: ${item.userId || 'anonymous'}
+                                        </div>
                                     </div>
-                                </div>
-                            `;
-                        } else {
-                            // Format raw event
-                            const desc = formatEventDescription(item);
-                            return `
-                                <div style="padding: 12px; border-bottom: 1px solid #3a3a4e; font-size: 0.9rem;">
-                                    <div style="font-weight: 500;">${desc}</div>
-                                    <div style="color: #888; font-size: 0.8rem; margin-top: 4px;">
-                                        ${new Date(item.server_timestamp || item.timestamp).toLocaleString()}
-                                        ${item.userId ? ` • User: ${item.userId}` : ''}
+                                `;
+                            } else {
+                                // Format raw event
+                                const desc = formatEventDescription(item);
+                                return `
+                                    <div style="padding: 12px; border-bottom: 1px solid #3a3a4e; font-size: 0.9rem;">
+                                        <div style="font-weight: 500;">${desc}</div>
+                                        <div style="color: #888; font-size: 0.8rem; margin-top: 4px;">
+                                            ${new Date(item.server_timestamp || item.timestamp).toLocaleString()}
+                                            ${item.userId ? ` • User: ${item.userId}` : ''}
+                                        </div>
                                     </div>
-                                </div>
-                            `;
-                        }
-                    }).join('');
+                                `;
+                            }
+                        }).join('');
+                    } else {
+                        feed.innerHTML = '<div style="padding: 20px; text-align: center; color: #888;">No meaningful activity yet. Use the main site to generate activity!</div>';
+                    }
                 } else {
-                    feed.innerHTML = '<div style="padding: 20px; text-align: center; color: #888;">No recent activity</div>';
+                    feed.innerHTML = '<div style="padding: 20px; text-align: center; color: #888;">No activity data available</div>';
                 }
             } catch (e) {
                 console.error('Activity feed error:', e);
+                document.getElementById('activityFeed').innerHTML = '<div style="padding: 20px; text-align: center; color: #ff6b6b;">Error loading activity feed</div>';
             }
         }
         
@@ -645,11 +657,17 @@
                 });
                 const data = await response.json();
                 
+                const avgTime = data.avg_response_time || 0;
+                const totalReqs = data.total_requests || 0;
+                
                 document.getElementById('avgResponse').textContent = 
-                    data.avg_response_time ? `${Math.round(data.avg_response_time)}ms` : '0ms';
-                document.getElementById('totalRequests').textContent = data.total_requests || 0;
+                    avgTime > 0 ? `${Math.round(avgTime)}ms` : 'No data yet';
+                document.getElementById('totalRequests').textContent = 
+                    totalReqs > 0 ? totalReqs : 'Use site to track';
             } catch (e) {
                 console.error('Performance stats error:', e);
+                document.getElementById('avgResponse').textContent = 'Error';
+                document.getElementById('totalRequests').textContent = 'Error';
             }
         }
         
@@ -702,6 +720,16 @@
                 const response = await fetch(`${API_URL}/api/${PORTAL_PATH}/analytics/revenue`, {
                     headers: { 'Authorization': `Bearer ${authToken}` }
                 });
+                
+                if (!response.ok) {
+                    // Backend not updated yet
+                    document.getElementById('apiCallsToday').textContent = 'N/A';
+                    document.getElementById('estimatedCost').textContent = 'N/A';
+                    document.getElementById('avgCallsPerUser').textContent = 'N/A';
+                    document.getElementById('peakHour').textContent = 'Deploy Backend';
+                    return;
+                }
+                
                 const data = await response.json();
                 
                 document.getElementById('apiCallsToday').textContent = data.total_api_calls || 0;
@@ -709,16 +737,26 @@
                 document.getElementById('avgCallsPerUser').textContent = data.avg_calls_per_user || 0;
                 
                 // Load peak hours
-                const peakResponse = await fetch(`${API_URL}/api/${PORTAL_PATH}/analytics/peak-hours`, {
-                    headers: { 'Authorization': `Bearer ${authToken}` }
-                });
-                const peakData = await peakResponse.json();
-                if (peakData.peak_hours && peakData.peak_hours.length > 0) {
-                    const topHour = peakData.peak_hours[0].hour.split('T')[1] || 'N/A';
-                    document.getElementById('peakHour').textContent = topHour;
+                try {
+                    const peakResponse = await fetch(`${API_URL}/api/${PORTAL_PATH}/analytics/peak-hours`, {
+                        headers: { 'Authorization': `Bearer ${authToken}` }
+                    });
+                    const peakData = await peakResponse.json();
+                    if (peakData.peak_hours && peakData.peak_hours.length > 0) {
+                        const topHour = peakData.peak_hours[0].hour.split('T')[1] || 'N/A';
+                        document.getElementById('peakHour').textContent = topHour;
+                    } else {
+                        document.getElementById('peakHour').textContent = 'No data';
+                    }
+                } catch (e) {
+                    document.getElementById('peakHour').textContent = 'N/A';
                 }
             } catch (e) {
                 console.error('Revenue metrics error:', e);
+                document.getElementById('apiCallsToday').textContent = 'Error';
+                document.getElementById('estimatedCost').textContent = 'Error';
+                document.getElementById('avgCallsPerUser').textContent = 'Error';
+                document.getElementById('peakHour').textContent = 'Error';
             }
         }
         
@@ -727,6 +765,19 @@
                 const response = await fetch(`${API_URL}/api/${PORTAL_PATH}/analytics/user-behavior`, {
                     headers: { 'Authorization': `Bearer ${authToken}` }
                 });
+                
+                if (!response.ok) {
+                    // Backend not updated yet
+                    document.getElementById('guidedMode').textContent = 'N/A';
+                    document.getElementById('guidedPercent').textContent = 'Deploy backend';
+                    document.getElementById('chatMode').textContent = 'N/A';
+                    document.getElementById('chatPercent').textContent = 'to enable';
+                    document.getElementById('compareMode').textContent = 'N/A';
+                    document.getElementById('comparePercent').textContent = 'this feature';
+                    document.getElementById('totalInteractions').textContent = 'N/A';
+                    return;
+                }
+                
                 const data = await response.json();
                 
                 document.getElementById('guidedMode').textContent = data.guided_mode?.count || 0;
@@ -741,6 +792,10 @@
                 document.getElementById('totalInteractions').textContent = data.total_interactions || 0;
             } catch (e) {
                 console.error('User behavior error:', e);
+                document.getElementById('guidedMode').textContent = 'Error';
+                document.getElementById('chatMode').textContent = 'Error';
+                document.getElementById('compareMode').textContent = 'Error';
+                document.getElementById('totalInteractions').textContent = 'Error';
             }
         }
         
@@ -749,6 +804,16 @@
                 const response = await fetch(`${API_URL}/api/${PORTAL_PATH}/system/health-full`, {
                     headers: { 'Authorization': `Bearer ${authToken}` }
                 });
+                
+                if (!response.ok) {
+                    // Backend not updated yet
+                    document.getElementById('cpuUsage').textContent = 'N/A';
+                    document.getElementById('memoryUsage').textContent = 'N/A';
+                    document.getElementById('diskUsage').textContent = 'N/A';
+                    document.getElementById('systemStatus').textContent = '⏳ Deploy Backend';
+                    return;
+                }
+                
                 const data = await response.json();
                 
                 document.getElementById('cpuUsage').textContent = `${data.cpu_percent?.toFixed(1) || 0}%`;
@@ -757,6 +822,10 @@
                 document.getElementById('systemStatus').textContent = data.status === 'healthy' ? '✅ Healthy' : '⚠️ Warning';
             } catch (e) {
                 console.error('System health error:', e);
+                document.getElementById('cpuUsage').textContent = 'Error';
+                document.getElementById('memoryUsage').textContent = 'Error';
+                document.getElementById('diskUsage').textContent = 'Error';
+                document.getElementById('systemStatus').textContent = '❌ Error';
             }
         }
         
