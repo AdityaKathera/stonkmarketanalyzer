@@ -10,6 +10,7 @@ from analytics import AnalyticsService
 from analytics_comprehensive import ComprehensiveAnalytics
 from secure_portal import setup_portal_routes
 from cache import SimpleCache
+from cache_enhanced import EnhancedCache
 import time
 from functools import wraps
 
@@ -25,8 +26,19 @@ perplexity_service = PerplexityService(os.getenv('PERPLEXITY_API_KEY'))
 # Use comprehensive analytics for admin portal
 analytics_service = ComprehensiveAnalytics()
 
-# Initialize cache with 1 hour TTL
-response_cache = SimpleCache(ttl_seconds=3600)
+# Initialize enhanced cache with Redis support (falls back to memory)
+redis_url = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
+response_cache = EnhancedCache(redis_url=redis_url, default_ttl=3600)
+
+# Cache TTL strategy (in seconds)
+CACHE_TTL = {
+    'fundamentals': 86400,  # 24 hours - changes slowly
+    'news': 3600,           # 1 hour - changes frequently  
+    'technical': 14400,     # 4 hours - moderate
+    'chat': 1800,           # 30 minutes - conversational
+    'comparison': 7200,     # 2 hours - moderate
+    'overview': 14400,      # 4 hours
+}
 
 # Performance tracking decorator
 def track_performance(endpoint_name):
@@ -60,7 +72,7 @@ def health_check():
 @app.route('/api/research/guided', methods=['POST'])
 @track_performance('/api/research/guided')
 def guided_research():
-    """Execute a guided research step"""
+    """Execute a guided research step with intelligent caching"""
     try:
         data = request.json
         step = data.get('step')
@@ -76,11 +88,29 @@ def guided_research():
         if step not in prompt_templates:
             return jsonify({'error': f'Invalid step: {step}'}), 400
         
+        # Generate cache key
+        cache_key = response_cache._generate_key(
+            'guided',
+            ticker=ticker,
+            step=step,
+            horizon=horizon,
+            risk=risk_level
+        )
+        
+        # Check cache first
+        cached_result = response_cache.get(cache_key)
+        if cached_result:
+            print(f"[CACHE HIT] {ticker} - {step}")
+            analytics_service.track_cache(hit=True)
+            cached_result['cached'] = True
+            return jsonify(cached_result)
+        
+        print(f"[CACHE MISS] {ticker} - {step} - Calling API...")
+        analytics_service.track_cache(hit=False)
+        
         # Get the prompt template and inject user inputs
         template_func = prompt_templates[step]['template']
         prompt = template_func(ticker, horizon, risk_level)
-        
-        print(f"[DEBUG] Calling Perplexity API...")
         
         # Call Perplexity API
         response = perplexity_service.query(prompt)
@@ -95,6 +125,13 @@ def guided_research():
             'cached': False
         }
         
+        # Determine TTL based on step type
+        ttl = CACHE_TTL.get(step, 3600)  # Default 1 hour
+        
+        # Cache the result
+        response_cache.set(cache_key, result, ttl)
+        print(f"[CACHE SET] {ticker} - {step} (TTL: {ttl}s)")
+        
         return jsonify(result)
     
     except Exception as e:
@@ -106,7 +143,7 @@ def guided_research():
 @app.route('/api/research/chat', methods=['POST'])
 @track_performance('/api/research/chat')
 def free_chat():
-    """Handle free-form chat queries"""
+    """Handle free-form chat queries with caching"""
     try:
         data = request.json
         ticker = data.get('ticker', '').upper()
@@ -115,18 +152,43 @@ def free_chat():
         if not ticker or not question:
             return jsonify({'error': 'Ticker and question are required'}), 400
         
+        # Generate cache key
+        cache_key = response_cache._generate_key(
+            'chat',
+            ticker=ticker,
+            question=question
+        )
+        
+        # Check cache first
+        cached_result = response_cache.get(cache_key)
+        if cached_result:
+            print(f"[CACHE HIT] Chat: {ticker}")
+            analytics_service.track_cache(hit=True)
+            cached_result['cached'] = True
+            return jsonify(cached_result)
+        
+        print(f"[CACHE MISS] Chat: {ticker} - Calling API...")
+        analytics_service.track_cache(hit=False)
+        
         # Generate prompt for free chat
         prompt = free_chat_template(ticker, question)
         
         # Call Perplexity API
         response = perplexity_service.query(prompt)
         
-        return jsonify({
+        result = {
             'ticker': ticker,
             'question': question,
             'response': response['content'],
-            'citations': response.get('citations', [])
-        })
+            'citations': response.get('citations', []),
+            'cached': False
+        }
+        
+        # Cache for 30 minutes (chat responses change more frequently)
+        response_cache.set(cache_key, result, CACHE_TTL['chat'])
+        print(f"[CACHE SET] Chat: {ticker} (TTL: {CACHE_TTL['chat']}s)")
+        
+        return jsonify(result)
     
     except Exception as e:
         return jsonify({'error': str(e)}), 500
