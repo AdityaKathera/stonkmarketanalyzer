@@ -10,6 +10,7 @@ from auth_service import (
 )
 import sqlite3
 import os
+import secrets
 
 auth_bp = Blueprint('auth', __name__)
 DB_PATH = 'users.db'
