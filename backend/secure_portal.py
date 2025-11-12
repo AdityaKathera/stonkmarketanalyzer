@@ -37,7 +37,14 @@ def hash_password(password):
 
 def verify_password(password, password_hash):
     """Verify password against hash"""
-    return hash_password(password) == password_hash
+    # Password hash format: salt:hash
+    if ':' in password_hash:
+        stored_salt, stored_hash = password_hash.split(':', 1)
+        computed_hash = hashlib.pbkdf2_hmac('sha256', password.encode(), stored_salt.encode(), 100000).hex()
+        return computed_hash == stored_hash
+    else:
+        # Fallback for old format
+        return hash_password(password) == password_hash
 
 def generate_token(username):
     """Generate JWT token"""
