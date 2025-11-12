@@ -307,3 +307,133 @@ def remove_from_watchlist(watchlist_id):
     conn.close()
     
     return jsonify({'success': True, 'message': 'Stock removed from watchlist'}), 200
+
+# Password Reset Routes
+
+@auth_bp.route('/api/auth/forgot-password', methods=['POST'])
+def forgot_password():
+    """Request password reset"""
+    from password_reset_service import PasswordResetService
+    
+    data = request.json
+    email = data.get('email', '').strip().lower()
+    
+    if not email:
+        return jsonify({'error': 'Email is required'}), 400
+    
+    reset_service = PasswordResetService()
+    token, error = reset_service.generate_reset_token(email)
+    
+    # Always return success to prevent email enumeration
+    return jsonify({
+        'success': True,
+        'message': 'If an account exists with that email, a password reset link has been sent.'
+    }), 200
+
+@auth_bp.route('/api/auth/verify-reset-token', methods=['POST'])
+def verify_reset_token():
+    """Verify if a reset token is valid"""
+    from password_reset_service import PasswordResetService
+    
+    data = request.json
+    token = data.get('token')
+    
+    if not token:
+        return jsonify({'error': 'Token is required'}), 400
+    
+    reset_service = PasswordResetService()
+    user_id, error = reset_service.verify_reset_token(token)
+    
+    if error:
+        return jsonify({'error': error, 'valid': False}), 400
+    
+    return jsonify({'valid': True}), 200
+
+@auth_bp.route('/api/auth/reset-password', methods=['POST'])
+def reset_password():
+    """Reset password with token"""
+    from password_reset_service import PasswordResetService
+    
+    data = request.json
+    token = data.get('token')
+    new_password = data.get('password')
+    
+    if not token or not new_password:
+        return jsonify({'error': 'Token and password are required'}), 400
+    
+    if len(new_password) < 8:
+        return jsonify({'error': 'Password must be at least 8 characters'}), 400
+    
+    reset_service = PasswordResetService()
+    success, error = reset_service.reset_password(token, new_password)
+    
+    if not success:
+        return jsonify({'error': error}), 400
+    
+    return jsonify({
+        'success': True,
+        'message': 'Password reset successfully. You can now login with your new password.'
+    }), 200
+
+# Google OAuth Routes
+
+@auth_bp.route('/api/auth/google', methods=['POST'])
+def google_auth():
+    """Authenticate with Google OAuth"""
+    from google.oauth2 import id_token
+    from google.auth.transport import requests as google_requests
+    
+    data = request.json
+    token = data.get('token')
+    
+    if not token:
+        return jsonify({'error': 'Google token is required'}), 400
+    
+    try:
+        # Verify Google token
+        CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
+        idinfo = id_token.verify_oauth2_token(
+            token, 
+            google_requests.Request(), 
+            CLIENT_ID
+        )
+        
+        # Get user info from Google
+        email = idinfo['email']
+        name = idinfo.get('name', '')
+        google_id = idinfo['sub']
+        
+        # Check if user exists
+        user = get_user_by_email(email)
+        
+        if user:
+            # Existing user - login
+            user_id = user[0]
+            update_last_login(user_id)
+        else:
+            # New user - create account
+            # Generate a random password (won't be used for Google auth)
+            random_password = secrets.token_urlsafe(32)
+            user_id = create_user(email, random_password, name)
+            
+            if not user_id:
+                return jsonify({'error': 'Failed to create user'}), 500
+        
+        # Generate JWT token
+        jwt_token = generate_token(user_id, email)
+        
+        return jsonify({
+            'success': True,
+            'token': jwt_token,
+            'user': {
+                'id': user_id,
+                'email': email,
+                'name': name
+            },
+            'message': 'Logged in with Google successfully'
+        }), 200
+        
+    except ValueError as e:
+        return jsonify({'error': 'Invalid Google token'}), 401
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
