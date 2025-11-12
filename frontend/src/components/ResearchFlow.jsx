@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { executeGuidedStep } from '../services/api'
 import analytics from '../analytics'
 import LoadingAnalysis from './LoadingAnalysis'
+import StockPriceHeader from './StockPriceHeader'
 
 // Simple markdown-like formatter
 const formatText = (text) => {
@@ -201,6 +202,9 @@ export default function ResearchFlow({ ticker, horizon, riskLevel }) {
           <h2>{currentStepData.icon} {currentStepData.name}</h2>
           {ticker && <span className="ticker-badge">{ticker}</span>}
         </div>
+
+        {/* Real-time Stock Price */}
+        {ticker && !loading && <StockPriceHeader ticker={ticker} />}
 
         {error && <div className="error-message">{error}</div>}
 

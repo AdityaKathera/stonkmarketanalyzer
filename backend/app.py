@@ -5,6 +5,7 @@ import os
 import hashlib
 
 from services.perplexity_service import PerplexityService
+from services.stock_price_service import stock_price_service
 from prompts.templates import prompt_templates, free_chat_template
 from analytics import AnalyticsService
 from analytics_comprehensive import ComprehensiveAnalytics
@@ -201,6 +202,42 @@ def get_templates():
         for key, value in prompt_templates.items()
     }
     return jsonify({'templates': templates})
+
+@app.route('/api/stock/price/<ticker>', methods=['GET'])
+@track_performance('/api/stock/price')
+def get_stock_price(ticker):
+    """
+    Get real-time stock price for a ticker
+    Security: Input validation, rate limiting via caching
+    """
+    try:
+        # Security: Validate ticker
+        if not ticker or not ticker.isalnum() or len(ticker) > 5:
+            return jsonify({'error': 'Invalid ticker format'}), 400
+        
+        ticker = ticker.upper()
+        
+        # Check cache first (cache for 1 minute)
+        cache_key = f"price:{ticker}"
+        cached_price = response_cache.get(cache_key)
+        if cached_price:
+            cached_price['cached'] = True
+            return jsonify(cached_price)
+        
+        # Fetch real-time price
+        price_data = stock_price_service.get_stock_price(ticker)
+        
+        if not price_data:
+            return jsonify({'error': 'Could not fetch price data'}), 404
+        
+        # Cache for 1 minute
+        response_cache.set(cache_key, price_data, 60)
+        price_data['cached'] = False
+        
+        return jsonify(price_data)
+    
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/analytics', methods=['POST'])
 def track_analytics():

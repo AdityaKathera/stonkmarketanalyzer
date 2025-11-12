@@ -1,0 +1,179 @@
+/* StockPriceHeader Component Styles */
+
+.stock-price-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.stock-price-header.loading {
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.stock-price-header.error {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+/* Main Price Section */
+.price-main {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+}
+
+.ticker-symbol {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.current-price {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #fff;
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.currency {
+  font-size: 1rem;
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+/* Change Indicators */
+.price-change {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.price-change.positive {
+  background: rgba(76, 175, 80, 0.2);
+  color: #4caf50;
+  border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.price-change.negative {
+  background: rgba(244, 67, 54, 0.2);
+  color: #f44336;
+  border: 1px solid rgba(244, 67, 54, 0.3);
+}
+
+.change-icon {
+  font-size: 0.875rem;
+}
+
+.change-amount {
+  font-weight: 700;
+}
+
+.change-percent {
+  opacity: 0.9;
+}
+
+/* Meta Information */
+.price-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-left: auto;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.market-state {
+  padding: 0.25rem 0.75rem;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  font-weight: 500;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+}
+
+.price-source {
+  opacity: 0.8;
+  font-style: italic;
+}
+
+.cached-indicator {
+  padding: 0.25rem 0.5rem;
+  background: rgba(255, 193, 7, 0.3);
+  border-radius: 4px;
+  font-size: 0.75rem;
+  color: #ffc107;
+}
+
+/* Loading State */
+.price-skeleton {
+  width: 300px;
+  height: 40px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0.1) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Error State */
+.price-error {
+  color: #fff;
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .stock-price-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .price-meta {
+    margin-left: 0;
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .current-price {
+    font-size: 1.75rem;
+  }
+  
+  .ticker-symbol {
+    font-size: 1.25rem;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .stock-price-header {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+}
