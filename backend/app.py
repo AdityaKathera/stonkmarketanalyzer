@@ -7,8 +7,11 @@ import hashlib
 from services.perplexity_service import PerplexityService
 from prompts.templates import prompt_templates, free_chat_template
 from analytics import AnalyticsService
+from analytics_comprehensive import ComprehensiveAnalytics
 from secure_portal import setup_portal_routes
 from cache import SimpleCache
+import time
+from functools import wraps
 
 load_dotenv()
 
@@ -19,10 +22,31 @@ allowed_origins = os.getenv('ALLOWED_ORIGINS', 'http://localhost:5173').split(',
 CORS(app, origins=allowed_origins)
 
 perplexity_service = PerplexityService(os.getenv('PERPLEXITY_API_KEY'))
-analytics_service = AnalyticsService()
+# Use comprehensive analytics for admin portal
+analytics_service = ComprehensiveAnalytics()
 
 # Initialize cache with 1 hour TTL
 response_cache = SimpleCache(ttl_seconds=3600)
+
+# Performance tracking decorator
+def track_performance(endpoint_name):
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            start_time = time.time()
+            try:
+                result = f(*args, **kwargs)
+                duration_ms = (time.time() - start_time) * 1000
+                status_code = result[1] if isinstance(result, tuple) else 200
+                analytics_service.track_api_call(endpoint_name, duration_ms, status_code)
+                return result
+            except Exception as e:
+                duration_ms = (time.time() - start_time) * 1000
+                analytics_service.track_api_call(endpoint_name, duration_ms, 500)
+                analytics_service.track_error('api_error', str(e))
+                raise
+        return decorated_function
+    return decorator
 
 # Setup secure admin portal
 portal_path, portal_username = setup_portal_routes(app, analytics_service)
@@ -34,6 +58,7 @@ def health_check():
     return jsonify({'status': 'ok', 'message': 'Stock Research API is running'})
 
 @app.route('/api/research/guided', methods=['POST'])
+@track_performance('/api/research/guided')
 def guided_research():
     """Execute a guided research step"""
     try:
@@ -79,6 +104,7 @@ def guided_research():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/research/chat', methods=['POST'])
+@track_performance('/api/research/chat')
 def free_chat():
     """Handle free-form chat queries"""
     try:
@@ -170,6 +196,7 @@ def clear_cache():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/research/compare', methods=['POST'])
+@track_performance('/api/research/compare')
 def compare_stocks():
     """Compare multiple stocks side-by-side"""
     try:
