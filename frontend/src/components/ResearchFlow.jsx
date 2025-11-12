@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { executeGuidedStep } from '../services/api'
 import analytics from '../analytics'
+import LoadingAnalysis from './LoadingAnalysis'
 
 // Simple markdown-like formatter
 const formatText = (text) => {
@@ -204,10 +205,14 @@ export default function ResearchFlow({ ticker, horizon, riskLevel }) {
         {error && <div className="error-message">{error}</div>}
 
         {loading && (
-          <div className="loading">
-            <div className="spinner"></div>
-            <p>Analyzing {ticker}...</p>
-          </div>
+          <LoadingAnalysis 
+            ticker={ticker} 
+            step={currentStepData.name}
+            onTimeout={() => {
+              setLoading(false);
+              setError('Analysis timed out. Please try again.');
+            }}
+          />
         )}
 
         {!loading && currentResult && (
