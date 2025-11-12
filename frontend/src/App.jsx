@@ -18,6 +18,35 @@ function App() {
     analytics.trackPageView('home');
   }, []);
 
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyPress = (e) => {
+      // Cmd/Ctrl + K - Focus ticker input
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        document.querySelector('input[type="text"]')?.focus();
+      }
+      
+      // Cmd/Ctrl + 1/2/3/4 - Switch modes
+      if ((e.metaKey || e.ctrlKey) && ['1', '2', '3', '4'].includes(e.key)) {
+        e.preventDefault();
+        const modes = ['guided', 'chat', 'compare', 'watchlist'];
+        const modeIndex = parseInt(e.key) - 1;
+        if (modes[modeIndex]) {
+          handleModeChange(modes[modeIndex]);
+        }
+      }
+      
+      // Escape - Clear ticker
+      if (e.key === 'Escape') {
+        setTicker('');
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, []);
+
   // Track mode changes
   const handleModeChange = (newMode) => {
     setMode(newMode);
@@ -56,7 +85,7 @@ function App() {
               </div>
               <div className="logo-text">
                 <h1>STONK MARKET ANALYZER</h1>
-                <p className="tagline">A prototype by Aditya Kathera</p>
+                <p className="tagline">📈 Where DD meets AI (and your portfolio goes brrrr)</p>
               </div>
             </div>
           </div>

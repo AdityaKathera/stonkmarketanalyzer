@@ -2,6 +2,10 @@
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 .app {
   min-height: 100vh;
   height: auto;
@@ -17,6 +21,12 @@
 .app-header {
   padding: 2rem;
   color: white;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
 }
 
 .header-content {
@@ -40,8 +50,8 @@
 
 .logo-icon {
   position: relative;
-  width: 120px;
-  height: 60px;
+  width: 160px;
+  height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -217,6 +227,7 @@
 .input-group select {
   width: 100%;
   padding: 0.75rem;
+  min-height: 44px;
   border: 2px solid #e0e0e0;
   border-radius: 8px;
   font-size: 1rem;
@@ -246,6 +257,8 @@
 
 .mode-toggle button {
   padding: 0.75rem 1rem;
+  min-height: 44px;
+  min-width: 44px;
   border: 2px solid #667eea;
   background: white;
   color: #667eea;
@@ -1105,8 +1118,8 @@
   }
 
   .logo-icon {
-    width: 100px;
-    height: 50px;
+    width: 120px;
+    height: 60px;
   }
 
   .logo-rocket {
