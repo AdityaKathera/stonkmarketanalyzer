@@ -43,6 +43,7 @@ TEMP_DIR=$(mktemp -d)
 cp backend/analytics_comprehensive.py "$TEMP_DIR/"
 cp backend/app.py "$TEMP_DIR/"
 cp backend/secure_portal.py "$TEMP_DIR/"
+cp backend/cache_enhanced.py "$TEMP_DIR/"
 
 echo "✓ Files prepared"
 
@@ -51,6 +52,7 @@ echo "Step 4: Uploading new files to EC2..."
 scp -i "$SSH_KEY" "$TEMP_DIR/analytics_comprehensive.py" ec2-user@$EC2_IP:/tmp/
 scp -i "$SSH_KEY" "$TEMP_DIR/app.py" ec2-user@$EC2_IP:/tmp/
 scp -i "$SSH_KEY" "$TEMP_DIR/secure_portal.py" ec2-user@$EC2_IP:/tmp/
+scp -i "$SSH_KEY" "$TEMP_DIR/cache_enhanced.py" ec2-user@$EC2_IP:/tmp/
 
 echo "✓ Files uploaded"
 
@@ -64,6 +66,7 @@ ssh -i "$SSH_KEY" ec2-user@$EC2_IP << 'ENDSSH'
     sudo mv /tmp/analytics_comprehensive.py /opt/stonkmarketanalyzer/backend/
     sudo mv /tmp/app.py /opt/stonkmarketanalyzer/backend/
     sudo mv /tmp/secure_portal.py /opt/stonkmarketanalyzer/backend/
+    sudo mv /tmp/cache_enhanced.py /opt/stonkmarketanalyzer/backend/
     
     # Set proper ownership
     sudo chown ec2-user:ec2-user /opt/stonkmarketanalyzer/backend/*.py
