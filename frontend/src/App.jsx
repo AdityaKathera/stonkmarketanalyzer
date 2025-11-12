@@ -85,7 +85,12 @@ function App() {
               </div>
               <div className="logo-text">
                 <h1>STONK MARKET ANALYZER</h1>
-                <p className="tagline">📈 Where DD meets AI (and your portfolio goes brrrr)</p>
+                <div className="market-indicators">
+                  <div className="market-dot"></div>
+                  <div className="market-dot"></div>
+                  <div className="market-dot"></div>
+                  <div className="market-line"></div>
+                </div>
               </div>
             </div>
           </div>
