@@ -7,9 +7,9 @@ AI-powered news feed that shows personalized news for your watchlist stocks with
 ## How to Use
 
 1. **Log in** to https://stonkmarketanalyzer.com
-2. **Add stocks** to your watchlist (if you haven't already)
+2. **Add stocks** to your portfolio (if you haven't already)
 3. **Click the "📰 News" tab** in the navigation
-4. **View AI-summarized news** for all your watchlist stocks
+4. **View AI-summarized news** for all your portfolio stocks
 5. **Filter by ticker** or view all news
 6. **Click "Read Full Article"** to see the complete story
 
@@ -61,14 +61,14 @@ POST /api/news/refresh
 
 Visit https://stonkmarketanalyzer.com and:
 1. Log in with your account
-2. Make sure you have stocks in your watchlist
+2. Make sure you have stocks in your portfolio
 3. Click the "📰 News" tab
 4. You should see news cards with AI summaries
 
 ## Troubleshooting
 
 **No news showing?**
-- Make sure you have stocks in your watchlist
+- Make sure you have stocks in your portfolio
 - Check that you're logged in
 - Try clicking the refresh button
 

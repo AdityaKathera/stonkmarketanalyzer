@@ -6,7 +6,7 @@
 
 ## Overview
 
-AI-powered news summarizer that provides personalized news feeds for watchlist stocks with intelligent summaries, sentiment analysis, and impact scoring.
+AI-powered news summarizer that provides personalized news feeds for portfolio stocks with intelligent summaries, sentiment analysis, and impact scoring.
 
 ## Features
 
@@ -60,7 +60,7 @@ AI-powered news summarizer that provides personalized news feeds for watchlist s
 - Returns: ticker, news array, count
 
 **`GET /api/news/watchlist`**
-- Get news for all watchlist stocks
+- Get news for all portfolio stocks
 - Query params: `limit_per_stock` (default: 3)
 - Returns: news object (ticker -> news array), tickers, count
 - Limits to 10 stocks to avoid rate limits
@@ -95,9 +95,9 @@ AI-powered news summarizer that provides personalized news feeds for watchlist s
 
 ## User Flow
 
-1. User logs in and adds stocks to watchlist
+1. User logs in and adds stocks to portfolio
 2. Clicks "📰 News" tab in navigation
-3. System fetches latest news for all watchlist stocks
+3. System fetches latest news for all portfolio stocks
 4. AI summarizes each article with sentiment and impact
 5. User can:
    - View all news or filter by ticker
