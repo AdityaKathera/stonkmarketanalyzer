@@ -365,29 +365,38 @@ aws cloudfront create-invalidation --distribution-id E2UZFZ0XAK8XWJ --paths "/*"
 
 ### ✅ AI News Summarizer - COMPLETE (Nov 13, 2024)
 - **Status**: ✅ Deployed and working in production
-- **Component**: `frontend/src/components/NewsSection.jsx`
+- **Component**: `frontend/src/components/NewsSection.jsx`, `frontend/src/components/NewsSection.css`
 - **Backend Services**: `backend/news_service.py`, `backend/news_summarizer_service.py`
 - **New Endpoints**:
   - `GET /api/news/stock/<ticker>` - Get news for specific stock
-  - `GET /api/news/watchlist` - Get news for all watchlist stocks
+  - `GET /api/news/watchlist` - Get news for all portfolio stocks
   - `POST /api/news/refresh` - Clear news cache
 - **Features**:
-  - 📰 Personalized news feed for watchlist stocks
+  - 📰 Personalized news feed for **portfolio stocks** (not watchlist)
   - 🤖 AI-powered summaries using Perplexity API
   - 📊 Sentiment analysis (Bullish/Bearish/Neutral)
   - 🎯 Impact scoring (High/Medium/Low)
   - 💡 Key takeaway points for each article
   - 🔄 1-hour caching for performance
-  - 🎨 Beautiful card-based UI with color-coded badges
-  - 🌓 Full dark mode support
+  - 🎨 Beautiful modern UI with smooth animations
+  - 🌓 Full dark mode support with excellent contrast
   - 📱 Mobile responsive design
+  - 🔗 Fallback news links (Yahoo Finance, Google Finance, MarketWatch)
+- **UI Improvements** (Nov 13, 10:15 AM):
+  - Complete redesign with modern card-based layout
+  - Smooth fade-in and stagger animations (GPU-accelerated)
+  - Better typography with increased font weights
+  - Excellent text visibility in both light and dark modes
+  - Hover effects with lift and shadow transitions
+  - Color-coded badges with gradients
+  - Top accent bar animation on card hover
 - **APIs Used**:
   - Alpha Vantage News & Sentiments API (free tier)
   - Perplexity AI for summarization
-- **Documentation**: `AI_NEWS_SUMMARIZER_COMPLETE.md`
+- **Documentation**: `AI_NEWS_SUMMARIZER_COMPLETE.md`, `QUICK_START_NEWS.md`
 
 ### 🎯 Next Task: TBD
-Phase 2 AI Features progressing well!
+Phase 2 AI Features progressing well! 133k tokens remaining.
 
 
 ---
@@ -488,4 +497,4 @@ Phase 2 AI Features progressing well!
 
 ---
 
-**Last Updated**: November 13, 2024, 9:50 AM UTC (AI News Summarizer deployed)
+**Last Updated**: November 13, 2024, 10:15 AM UTC (AI News Summarizer complete with UI improvements)
