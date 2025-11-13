@@ -1,16 +1,122 @@
-# ✅ COMPLETED: Account Linking
-
-## Status: COMPLETE (November 13, 2024)
-
-**Feature:** Account Linking - See `ACCOUNT_LINKING_COMPLETE.md` for details
-
----
-
-# Next Session Task: TBD
+# Next Session Task: AI News Summarizer
 
 ## Task for Next AI Assistant
 
-**User wants to build:** (To be determined)
+**User wants to build:** AI News Summarizer (Phase 2 - AI Features)
+
+## What is AI News Summarizer?
+
+Personalized news feed for user's watchlist stocks with AI-powered summaries and sentiment analysis.
+
+## Features to Build
+
+### 1. News Fetching Service
+- Fetch latest news for watchlist stocks
+- Use news API (NewsAPI, Alpha Vantage, or similar)
+- Cache news for performance
+
+### 2. AI Summarization
+- Use Perplexity API to summarize news articles
+- Sentiment analysis (bullish/bearish/neutral)
+- Impact score on stock price
+- Key takeaways in bullet points
+
+### 3. Frontend UI
+- New "News" tab or section
+- News cards with summaries
+- Sentiment indicators (color-coded)
+- Filter by stock ticker
+- Refresh functionality
+
+## Implementation Plan
+
+### Phase 1: Backend (1.5 hours)
+1. Create `news_service.py` - Fetch news from API
+2. Create `news_summarizer_service.py` - AI summarization
+3. Add endpoint: `GET /api/news/watchlist`
+4. Add endpoint: `GET /api/news/stock/{ticker}`
+5. Implement caching (1 hour per stock)
+
+### Phase 2: Frontend (1.5 hours)
+1. Create `NewsSection.jsx` component
+2. News card component with summary
+3. Sentiment badges and icons
+4. Filter and sort functionality
+5. Loading states and error handling
+
+### Phase 3: Integration (30 min)
+1. Add to main app navigation
+2. Test with real data
+3. Polish UI/UX
+4. Mobile responsive
+
+### Phase 4: Deploy (30 min)
+1. Deploy backend
+2. Deploy frontend
+3. Test in production
+4. Update documentation
+
+## Expected Output
+
+Users will see:
+- Latest news for their watchlist stocks
+- AI-generated summaries (3-5 sentences)
+- Sentiment indicators (🟢 Bullish, 🔴 Bearish, ⚪ Neutral)
+- Impact scores (High/Medium/Low)
+- Source and timestamp
+- Click to read full article
+
+## Files to Create
+
+**Backend:**
+- `backend/news_service.py`
+- `backend/news_summarizer_service.py`
+
+**Frontend:**
+- `frontend/src/components/NewsSection.jsx`
+- `frontend/src/components/NewsSection.css`
+- `frontend/src/components/NewsCard.jsx`
+
+**Files to Modify:**
+- `backend/auth_routes.py` - Add news endpoints
+- `frontend/src/App.jsx` - Add news navigation
+
+## Success Criteria
+
+- [ ] News fetches for all watchlist stocks
+- [ ] AI summaries are accurate and concise
+- [ ] Sentiment analysis is reasonable
+- [ ] UI is clean and readable
+- [ ] Works in both light and dark modes
+- [ ] Mobile responsive
+- [ ] Deployed to production
+
+## Estimated Time: 3-4 hours
+
+## Prerequisites
+
+- Perplexity API (already configured) ✅
+- News API key (need to add to .env)
+- Watchlist feature (already exists) ✅
+
+---
+
+## Previous Completed Features
+
+### ✅ Account Linking (Nov 13, 2024)
+- Link/unlink Google accounts
+- Set primary authentication method
+- Auto-linking on sign-in
+
+### ✅ Smart Portfolio Insights (Nov 13, 2024)
+- AI-powered portfolio analysis
+- Diversification scoring
+- Risk warnings and recommendations
+- Performance tracking
+
+---
+
+**Ready to build!** Start by reading `AI_SESSION_CONTEXT.md` for full context.
 
 ## What is Account Linking?
 
