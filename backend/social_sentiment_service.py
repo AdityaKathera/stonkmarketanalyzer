@@ -58,6 +58,12 @@ class SocialSentimentService:
     def _analyze_sentiment(self, ticker: str) -> Dict:
         """Use Perplexity AI to analyze social sentiment"""
         
+        print(f"[SocialSentiment] Starting AI analysis for {ticker}")
+        
+        if not self.api_key:
+            print("[SocialSentiment] ERROR: No Perplexity API key found")
+            raise Exception("Perplexity API key not configured")
+        
         prompt = f"""Analyze the current social media and community sentiment for {ticker} stock.
 
 Provide:
@@ -99,14 +105,31 @@ SUMMARY: [2-3 sentences]"""
             "max_tokens": 400
         }
         
-        response = requests.post(self.api_url, json=payload, headers=headers, timeout=15)
-        response.raise_for_status()
+        print(f"[SocialSentiment] Calling Perplexity API for {ticker}")
         
-        result = response.json()
-        content = result['choices'][0]['message']['content']
-        
-        # Parse the response
-        return self._parse_sentiment_response(content, ticker)
+        try:
+            response = requests.post(self.api_url, json=payload, headers=headers, timeout=20)
+            print(f"[SocialSentiment] API response status: {response.status_code}")
+            
+            response.raise_for_status()
+            
+            result = response.json()
+            content = result['choices'][0]['message']['content']
+            
+            print(f"[SocialSentiment] Successfully got AI response for {ticker}")
+            
+            # Parse the response
+            return self._parse_sentiment_response(content, ticker)
+            
+        except requests.exceptions.Timeout:
+            print(f"[SocialSentiment] ERROR: API timeout for {ticker}")
+            raise Exception("API timeout")
+        except requests.exceptions.RequestException as e:
+            print(f"[SocialSentiment] ERROR: API request failed for {ticker}: {e}")
+            raise
+        except Exception as e:
+            print(f"[SocialSentiment] ERROR: Unexpected error for {ticker}: {e}")
+            raise
     
     def _parse_sentiment_response(self, content: str, ticker: str) -> Dict:
         """Parse AI response into structured data"""
