@@ -620,4 +620,51 @@ Phase 2 AI Features complete! All systems working. Ready for Phase 3.
 
 ---
 
-**Last Updated**: November 13, 2024, 11:20 AM UTC (Floating AI Chat complete - all features working)
+### ✅ Stock Charts, Price Alerts, Enhanced Watchlist & Market Overview - COMPLETE (Nov 13, 2024)
+- **Status**: ✅ All features built and ready to deploy
+- **Implementation Time**: ~3 hours
+- **Components Created**:
+  - `frontend/src/components/StockChart.jsx` - Interactive charts with lightweight-charts
+  - `frontend/src/components/PriceAlerts.jsx` - Price alert management
+  - `frontend/src/components/MarketOverview.jsx` - Market dashboard
+  - Enhanced `frontend/src/components/Watchlist.jsx` - Live prices and sorting
+- **Backend Services**:
+  - `backend/chart_service.py` - Historical price data
+  - `backend/price_alerts_service.py` - Alert management with email notifications
+  - `backend/market_overview_service.py` - Market indices and movers
+  - `backend/stock_routes.py` - New API endpoints
+- **New API Endpoints**:
+  - `GET /api/stock/price/<ticker>` - Single stock price
+  - `GET /api/stock/prices?tickers=...` - Batch price fetching
+  - `GET /api/stock/chart/<ticker>?timeframe=...` - Chart data (1D, 1W, 1M, 3M, 1Y, 5Y)
+  - `GET /api/alerts` - Get user alerts
+  - `POST /api/alerts` - Create price alert
+  - `DELETE /api/alerts/<id>` - Delete alert
+  - `GET /api/market/overview` - Market dashboard data
+- **Features**:
+  - 📈 **Interactive Stock Charts**: Candlestick & line charts, multiple timeframes, volume indicators
+  - ⚠️ **Price Alerts**: Set price targets, email notifications, alert history
+  - 💹 **Enhanced Watchlist**: Live prices, gain/loss indicators, sort by performance
+  - 🌍 **Market Overview**: Major indices, top gainers/losers, sector performance
+- **Cost Impact**: $0 - All features use FREE Yahoo Finance API
+- **Dependencies Added**: `lightweight-charts` (TradingView library)
+- **Documentation**: `NEW_FEATURES_COMPLETE.md`, `MISSING_FEATURES_PLAN.md`
+- **Git Status**: ✅ Committed and pushed to main
+
+### 💰 Cost Breakdown (Updated Nov 13, 2024)
+
+**Monthly Costs:**
+- **AWS**: $10-45/month (EC2, S3, CloudFront, Route 53)
+- **Perplexity API**: $20-40/month (Standard plan for 5,000 requests)
+- **Total**: $30-85/month
+
+**New Features Cost**: $0 (Yahoo Finance is free!)
+
+**Estimated by Traffic:**
+- 0-100 users/day: $30-65/month
+- 100-500 users/day: $50-100/month
+- 500-1000 users/day: $100-200/month
+
+---
+
+**Last Updated**: November 13, 2024, 2:30 PM UTC (Stock Charts, Alerts, Watchlist & Market Overview complete)
