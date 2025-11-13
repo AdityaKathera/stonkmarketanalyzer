@@ -1710,3 +1710,71 @@ html {
   background: rgba(248, 113, 113, 0.2);
   border-color: #f87171;
 }
+
+/* User Menu and Profile Button Styles */
+.user-menu {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.profile-btn {
+  padding: 8px 16px;
+  background: rgba(102, 126, 234, 0.1);
+  color: #667eea !important;
+  border: 1px solid rgba(102, 126, 234, 0.3);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.profile-btn:hover {
+  background: rgba(102, 126, 234, 0.2);
+  border-color: #667eea;
+  color: #667eea !important;
+}
+
+.logout-btn {
+  padding: 8px 16px;
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444 !important;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.logout-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: #ef4444;
+  color: #ef4444 !important;
+}
+
+/* Dark mode user menu */
+.dark-mode .profile-btn {
+  background: rgba(129, 140, 248, 0.15);
+  color: #a5b4fc !important;
+  border-color: rgba(129, 140, 248, 0.3);
+}
+
+.dark-mode .profile-btn:hover {
+  background: rgba(129, 140, 248, 0.25);
+  border-color: #818cf8;
+  color: #c7d2fe !important;
+}
+
+.dark-mode .logout-btn {
+  background: rgba(248, 113, 113, 0.15);
+  color: #fca5a5 !important;
+  border-color: rgba(248, 113, 113, 0.3);
+}
+
+.dark-mode .logout-btn:hover {
+  background: rgba(248, 113, 113, 0.25);
+  border-color: #f87171;
+  color: #fecaca !important;
+}
