@@ -539,10 +539,50 @@
   color: #1e293b;
 }
 
-.link-account-section p {
+.link-account-section > p {
   margin: 0 0 20px 0;
   color: #64748b;
   font-size: 14px;
+}
+
+.link-step-section {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border-left: 4px solid #667eea;
+}
+
+.link-step-section h5 {
+  margin: 0 0 15px 0;
+  font-size: 16px;
+  color: #1e293b;
+  font-weight: 700;
+}
+
+.link-step-section p {
+  margin: 8px 0;
+  color: #1e293b;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.link-step-section .small-note {
+  font-size: 13px;
+  color: #64748b;
+  font-style: italic;
+}
+
+.create-account-link {
+  color: #667eea;
+  text-decoration: underline;
+  font-weight: 600;
+  display: inline-block;
+  margin: 5px 0;
+}
+
+.create-account-link:hover {
+  color: #5568d3;
 }
 
 .link-instructions {
@@ -696,6 +736,31 @@
 }
 
 .dark-mode .link-note a:hover {
+  color: #a5b4fc;
+}
+
+.dark-mode .link-step-section {
+  background: #1e293b;
+  border-left-color: #818cf8;
+}
+
+.dark-mode .link-step-section h5 {
+  color: #f1f5f9;
+}
+
+.dark-mode .link-step-section p {
+  color: #e2e8f0;
+}
+
+.dark-mode .link-step-section .small-note {
+  color: #94a3b8;
+}
+
+.dark-mode .create-account-link {
+  color: #818cf8;
+}
+
+.dark-mode .create-account-link:hover {
   color: #a5b4fc;
 }
 

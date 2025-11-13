@@ -497,19 +497,28 @@ function Profile({ user, onUpdateUser }) {
           {!hasGoogleLinked && (
             <div className="link-account-section">
               <h4>Link Google Account</h4>
-              <p>To link your Google account to this email (<strong>{displayUser?.email}</strong>):</p>
-              <div className="link-instructions">
-                <ol>
-                  <li>Make sure you have a Google account with the email: <strong>{displayUser?.email}</strong></li>
-                  <li>Log out of your current session</li>
-                  <li>Click "Sign in with Google" on the login page</li>
-                  <li>Sign in with Google using: <strong>{displayUser?.email}</strong></li>
-                  <li>Your Google account will be automatically linked!</li>
-                </ol>
+              
+              <div className="link-step-section">
+                <h5>📝 Step 1: Create or Verify Google Account</h5>
+                <p><strong>Don't have a Google account with {displayUser?.email}?</strong></p>
+                <p>Create one for free at <a href="https://accounts.google.com/signup" target="_blank" rel="noopener noreferrer" className="create-account-link">accounts.google.com/signup</a></p>
+                <p className="small-note">✨ You can use ANY email address (Gmail, Yahoo, Outlook, etc.) to create a Google account</p>
               </div>
+
+              <div className="link-step-section">
+                <h5>🔗 Step 2: Link Your Account</h5>
+                <div className="link-instructions">
+                  <ol>
+                    <li>Log out of your current session</li>
+                    <li>Click "Sign in with Google" on the login page</li>
+                    <li>Sign in with Google using: <strong>{displayUser?.email}</strong></li>
+                    <li>Your Google account will be automatically linked!</li>
+                  </ol>
+                </div>
+              </div>
+
               <div className="link-note">
-                <p>💡 <strong>Important:</strong> You need a Google account associated with <strong>{displayUser?.email}</strong>. If you don't have one, you can create a Google account with any email address at <a href="https://accounts.google.com/signup" target="_blank" rel="noopener noreferrer">accounts.google.com/signup</a></p>
-                <p>✅ Your account data (portfolio, watchlist, etc.) will be preserved when linking.</p>
+                <p>✅ <strong>Your data is safe:</strong> All your portfolio, watchlist, and account data will be preserved when linking.</p>
               </div>
             </div>
           )}
