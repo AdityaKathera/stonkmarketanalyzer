@@ -75,6 +75,15 @@ If you're the project owner:
 
 ## 🆕 Latest Features (November 13, 2024)
 
+### Phase 1 Account Features ✨ NEW!
+- **Remember Me**: Stay logged in for 30 days (vs 7 days default)
+- **Profile Page**: View/edit name, change password, account stats
+- **User Menu**: Profile button in header, easy access to settings
+- **Security Tab**: Change password with validation
+- **Dark Mode**: Full support throughout profile
+- **Responsive**: Mobile-friendly design
+- **Documentation**: `PHASE1_ACCOUNT_FEATURES.md`
+
 ### Google SSO
 - One-click sign-in with Google
 - Automatic account creation
@@ -97,4 +106,4 @@ If you're the project owner:
 
 ---
 
-**Last Updated**: November 13, 2024
+**Last Updated**: November 13, 2024 (Phase 1 Account Features Deployed)
