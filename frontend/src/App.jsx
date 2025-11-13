@@ -10,21 +10,20 @@ import SocialSentiment from './components/SocialSentiment'
 import FloatingChat from './components/FloatingChat'
 import AuthModal from './components/AuthModal'
 import StockChart from './components/StockChart'
-import PriceAlerts from './components/PriceAlerts'
 import MarketOverview from './components/MarketOverview'
-import PortfolioDoctor from './components/PortfolioDoctor'
-import SmartRebalance from './components/SmartRebalance'
+import AIInsights from './components/AIInsights'
 import analytics from './analytics'
 import './App.css'
 
 function App() {
-  const [mode, setMode] = useState('guided') // 'guided', 'compare', 'watchlist', 'portfolio', 'profile', 'news', 'sentiment', 'alerts', 'market', 'doctor', 'rebalance'
+  const [mode, setMode] = useState('guided') // 'guided', 'watchlist', 'portfolio', 'market', 'insights'
   const [ticker, setTicker] = useState('')
   const [horizon, setHorizon] = useState('1-3 years')
   const [riskLevel, setRiskLevel] = useState('moderate')
   const [darkMode, setDarkMode] = useState(false)
   const [user, setUser] = useState(null)
   const [showAuthModal, setShowAuthModal] = useState(false)
+  const [showUserMenu, setShowUserMenu] = useState(false)
 
   // Track page view on mount and check for existing auth
   useEffect(() => {
@@ -141,13 +140,27 @@ function App() {
           </div>
           <div className="header-actions">
             {user ? (
-              <div className="user-menu">
-                <button className="profile-btn" onClick={() => handleModeChange('profile')}>
-                  👤 {user.name || user.email}
+              <div className="user-menu-container">
+                <button 
+                  className="profile-btn" 
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                >
+                  👤 {user.name || user.email.split('@')[0]}
                 </button>
-                <button className="logout-btn" onClick={handleLogout}>
-                  Logout
-                </button>
+                {showUserMenu && (
+                  <div className="user-dropdown">
+                    <button onClick={() => { handleModeChange('portfolio'); setShowUserMenu(false); }}>
+                      💼 My Portfolio
+                    </button>
+                    <button onClick={() => { handleModeChange('insights'); setShowUserMenu(false); }}>
+                      🧠 AI Insights
+                    </button>
+                    <div className="dropdown-divider"></div>
+                    <button onClick={handleLogout}>
+                      🚪 Logout
+                    </button>
+                  </div>
+                )}
               </div>
             ) : (
               <button className="login-btn" onClick={() => setShowAuthModal(true)}>
@@ -201,13 +214,7 @@ function App() {
             className={mode === 'guided' ? 'active' : ''}
             onClick={() => handleModeChange('guided')}
           >
-            📊 Guided
-          </button>
-          <button
-            className={mode === 'compare' ? 'active' : ''}
-            onClick={() => handleModeChange('compare')}
-          >
-            ⚖️ Compare
+            📊 Research
           </button>
           <button
             className={mode === 'watchlist' ? 'active' : ''}
@@ -230,40 +237,10 @@ function App() {
                 💼 Portfolio
               </button>
               <button
-                className={mode === 'doctor' ? 'active' : ''}
-                onClick={() => handleModeChange('doctor')}
+                className={mode === 'insights' ? 'active' : ''}
+                onClick={() => handleModeChange('insights')}
               >
-                🩺 Doctor
-              </button>
-              <button
-                className={mode === 'rebalance' ? 'active' : ''}
-                onClick={() => handleModeChange('rebalance')}
-              >
-                ⚖️ Rebalance
-              </button>
-              <button
-                className={mode === 'alerts' ? 'active' : ''}
-                onClick={() => handleModeChange('alerts')}
-              >
-                ⚠️ Alerts
-              </button>
-              <button
-                className={mode === 'news' ? 'active' : ''}
-                onClick={() => handleModeChange('news')}
-              >
-                📰 News
-              </button>
-              <button
-                className={mode === 'sentiment' ? 'active' : ''}
-                onClick={() => handleModeChange('sentiment')}
-              >
-                📊 Sentiment
-              </button>
-              <button
-                className={mode === 'profile' ? 'active' : ''}
-                onClick={() => handleModeChange('profile')}
-              >
-                ⚙️ Profile
+                🧠 AI Insights
               </button>
             </>
           )}
@@ -289,23 +266,8 @@ function App() {
         {mode === 'portfolio' && user && (
           <Portfolio user={user} />
         )}
-        {mode === 'doctor' && user && (
-          <PortfolioDoctor user={user} />
-        )}
-        {mode === 'rebalance' && user && (
-          <SmartRebalance user={user} />
-        )}
-        {mode === 'alerts' && user && (
-          <PriceAlerts user={user} />
-        )}
-        {mode === 'news' && user && (
-          <NewsSection />
-        )}
-        {mode === 'sentiment' && user && (
-          <SocialSentiment />
-        )}
-        {mode === 'profile' && user && (
-          <Profile user={user} onUpdateUser={handleUpdateUser} />
+        {mode === 'insights' && user && (
+          <AIInsights user={user} />
         )}
       </main>
 
