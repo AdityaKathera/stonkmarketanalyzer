@@ -172,11 +172,9 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
             <GoogleLogin
               onSuccess={handleGoogleSuccess}
               onError={handleGoogleError}
-              useOneTap
               theme="outline"
               size="large"
               text={mode === 'login' ? 'signin_with' : 'signup_with'}
-              width="100%"
             />
           </div>
 
