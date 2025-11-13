@@ -7,7 +7,7 @@ from services.stock_price_service import stock_price_service
 from chart_service import chart_service
 from price_alerts_service import price_alerts_service
 from market_overview_service import market_overview_service
-from auth_middleware import require_auth
+from auth_service import require_auth
 import logging
 
 logger = logging.getLogger(__name__)
