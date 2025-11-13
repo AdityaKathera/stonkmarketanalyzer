@@ -325,3 +325,157 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+/* Enhanced Portfolio Styles */
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.refresh-btn {
+  padding: 10px 20px;
+  background: #4a5568;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.refresh-btn:hover:not(:disabled) {
+  background: #2d3748;
+  transform: translateY(-2px);
+}
+
+.refresh-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Portfolio Summary Cards */
+.portfolio-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.summary-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+  border-radius: 12px;
+  color: white;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.summary-card.positive {
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+}
+
+.summary-card.negative {
+  background: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%);
+}
+
+.summary-label {
+  font-size: 12px;
+  opacity: 0.9;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.summary-value {
+  font-size: 24px;
+  font-weight: bold;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.summary-percent {
+  font-size: 16px;
+  opacity: 0.9;
+}
+
+/* Enhanced Portfolio Cards */
+.portfolio-card.profit {
+  border-left: 4px solid #38ef7d;
+}
+
+.portfolio-card.loss {
+  border-left: 4px solid #ff6a00;
+}
+
+.card-performance {
+  padding: 15px 0;
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 15px;
+}
+
+.current-price {
+  font-size: 28px;
+  font-weight: bold;
+  color: #2d3748;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.return-badge {
+  font-size: 14px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+.return-badge.positive {
+  background: #c6f6d5;
+  color: #22543d;
+}
+
+.return-badge.negative {
+  background: #fed7d7;
+  color: #742a2a;
+}
+
+.gain-loss {
+  font-size: 16px;
+  font-weight: 600;
+  color: #4a5568;
+}
+
+.last-updated {
+  text-align: center;
+  color: #718096;
+  font-size: 12px;
+  margin-top: 20px;
+  padding: 10px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .portfolio-summary {
+    grid-template-columns: 1fr;
+  }
+  
+  .header-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .refresh-btn,
+  .add-stock-btn {
+    width: 100%;
+  }
+  
+  .current-price {
+    font-size: 22px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

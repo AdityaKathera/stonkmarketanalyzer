@@ -237,6 +237,30 @@ def delete_portfolio_holding(holding_id):
     
     return jsonify({'success': True, 'message': 'Holding deleted'}), 200
 
+# Enhanced Portfolio Routes with Real-Time Data
+
+@auth_bp.route('/api/portfolio/summary', methods=['GET'])
+@require_auth
+def get_portfolio_summary():
+    """Get portfolio with real-time prices and performance metrics"""
+    try:
+        from portfolio_service import portfolio_service
+        portfolio_data = portfolio_service.get_portfolio_with_metrics(request.user_id)
+        return jsonify(portfolio_data), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@auth_bp.route('/api/portfolio/allocation', methods=['GET'])
+@require_auth
+def get_portfolio_allocation():
+    """Get portfolio allocation breakdown"""
+    try:
+        from portfolio_service import portfolio_service
+        allocation = portfolio_service.get_portfolio_allocation(request.user_id)
+        return jsonify(allocation), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 # Watchlist Routes
 
 @auth_bp.route('/api/watchlist', methods=['GET'])
