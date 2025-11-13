@@ -58,8 +58,12 @@ class NewsSummarizerService:
                 **news_item,
                 'ai_summary': news_item.get('summary', 'Summary not available'),
                 'ai_sentiment': self._parse_sentiment(news_item.get('sentiment_label', 'Neutral')),
-                'ai_impact': 'Medium',
-                'key_points': []
+                'ai_impact': 'Low',
+                'key_points': [
+                    'Click to view full details',
+                    'Real-time market data available',
+                    'Check for latest updates'
+                ]
             }
     
     def summarize_multiple(self, news_items: List[Dict], ticker: str) -> List[Dict]:

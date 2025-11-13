@@ -56,6 +56,8 @@ class NewsService:
             news_items = []
             feed = data.get('feed', [])
             
+            print(f"[NewsService] Found {len(feed)} news items for {ticker}")
+            
             for item in feed[:limit]:
                 news_items.append({
                     'title': item.get('title', 'No title'),
@@ -67,6 +69,11 @@ class NewsService:
                     'sentiment_score': item.get('overall_sentiment_score', 0),
                     'sentiment_label': item.get('overall_sentiment_label', 'Neutral')
                 })
+            
+            # If no news found, use fallback
+            if not news_items:
+                print(f"[NewsService] No news found for {ticker}, using fallback")
+                news_items = self._get_fallback_news(ticker, limit)
             
             # Cache the results
             self.cache[ticker] = {
@@ -97,17 +104,40 @@ class NewsService:
     def _get_fallback_news(self, ticker: str, limit: int) -> List[Dict]:
         """
         Fallback news when API fails or rate limited
+        Provides multiple helpful links for the stock
         """
-        return [{
-            'title': f'Latest updates on {ticker}',
-            'url': f'https://finance.yahoo.com/quote/{ticker}',
-            'source': 'Yahoo Finance',
-            'time_published': datetime.now().strftime('%Y%m%dT%H%M%S'),
-            'summary': f'Check the latest news and analysis for {ticker} stock.',
-            'banner_image': None,
-            'sentiment_score': 0,
-            'sentiment_label': 'Neutral'
-        }]
+        return [
+            {
+                'title': f'{ticker} Stock Overview and Latest Updates',
+                'url': f'https://finance.yahoo.com/quote/{ticker}',
+                'source': 'Yahoo Finance',
+                'time_published': datetime.now().strftime('%Y%m%dT%H%M%S'),
+                'summary': f'View real-time stock price, charts, and financial data for {ticker}. Get the latest market updates and analysis.',
+                'banner_image': None,
+                'sentiment_score': 0,
+                'sentiment_label': 'Neutral'
+            },
+            {
+                'title': f'{ticker} News and Analysis',
+                'url': f'https://www.google.com/finance/quote/{ticker}:NYSE',
+                'source': 'Google Finance',
+                'time_published': datetime.now().strftime('%Y%m%dT%H%M%S'),
+                'summary': f'Latest news, financial reports, and market analysis for {ticker} stock.',
+                'banner_image': None,
+                'sentiment_score': 0,
+                'sentiment_label': 'Neutral'
+            },
+            {
+                'title': f'{ticker} Company Profile and Financials',
+                'url': f'https://www.marketwatch.com/investing/stock/{ticker.lower()}',
+                'source': 'MarketWatch',
+                'time_published': datetime.now().strftime('%Y%m%dT%H%M%S'),
+                'summary': f'Comprehensive financial information, earnings reports, and market data for {ticker}.',
+                'banner_image': None,
+                'sentiment_score': 0,
+                'sentiment_label': 'Neutral'
+            }
+        ][:limit]
     
     def clear_cache(self):
         """Clear all cached news"""
