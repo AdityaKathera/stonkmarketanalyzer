@@ -760,3 +760,89 @@ def refresh_news_cache():
     except Exception as e:
         print(f"[API] Error clearing cache: {e}")
         return jsonify({'error': 'Failed to clear cache'}), 500
+
+
+# ============================================================================
+# SOCIAL SENTIMENT ENDPOINTS
+# ============================================================================
+
+from social_sentiment_service import get_sentiment_service
+
+@auth_bp.route('/api/sentiment/stock/<ticker>', methods=['GET'])
+@require_auth
+def get_stock_sentiment(ticker):
+    """
+    Get social sentiment analysis for a specific stock
+    """
+    try:
+        sentiment_service = get_sentiment_service()
+        sentiment_data = sentiment_service.get_sentiment(ticker.upper())
+        
+        return jsonify(sentiment_data), 200
+        
+    except Exception as e:
+        print(f"[API] Error fetching sentiment for {ticker}: {e}")
+        return jsonify({'error': 'Failed to fetch sentiment'}), 500
+
+
+@auth_bp.route('/api/sentiment/portfolio', methods=['GET'])
+@require_auth
+def get_portfolio_sentiment():
+    """
+    Get social sentiment for all stocks in user's portfolio
+    """
+    try:
+        user_id = request.user_id
+        
+        # Get user's portfolio stocks
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            SELECT DISTINCT ticker FROM portfolio 
+            WHERE user_id = ? 
+            ORDER BY ticker ASC
+        ''', (user_id,))
+        
+        portfolio_tickers = [row[0] for row in cursor.fetchall()]
+        conn.close()
+        
+        if not portfolio_tickers:
+            return jsonify({
+                'sentiment': {},
+                'message': 'No stocks in portfolio'
+            }), 200
+        
+        # Get sentiment for all portfolio stocks
+        sentiment_service = get_sentiment_service()
+        all_sentiment = sentiment_service.get_portfolio_sentiment(portfolio_tickers[:10])
+        
+        return jsonify({
+            'sentiment': all_sentiment,
+            'tickers': portfolio_tickers[:10],
+            'count': len(all_sentiment)
+        }), 200
+        
+    except Exception as e:
+        print(f"[API] Error fetching portfolio sentiment: {e}")
+        return jsonify({'error': 'Failed to fetch portfolio sentiment'}), 500
+
+
+@auth_bp.route('/api/sentiment/refresh', methods=['POST'])
+@require_auth
+def refresh_sentiment_cache():
+    """
+    Clear sentiment cache to force refresh
+    """
+    try:
+        sentiment_service = get_sentiment_service()
+        sentiment_service.clear_cache()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Sentiment cache cleared'
+        }), 200
+        
+    except Exception as e:
+        print(f"[API] Error clearing cache: {e}")
+        return jsonify({'error': 'Failed to clear cache'}), 500
