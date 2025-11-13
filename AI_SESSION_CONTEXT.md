@@ -284,14 +284,25 @@ aws cloudfront create-invalidation --distribution-id E2UZFZ0XAK8XWJ --paths "/*"
 
 ### ✅ Completed
 - Google SSO working on https://stonkmarketanalyzer.com
-- Profile page with improved header design
+- Profile page with improved header design (100px avatar, white text)
 - Remember Me checkbox (7 vs 30 day sessions)
 - CORS fixed for PUT/DELETE methods
-- Profile name visibility fixed
-- Deployment script created
+- Profile name visibility fixed (white text on gradient)
+- User menu styling fixed (white text for username and logout button)
+- Deployment script created (deploy-with-role.sh)
+- Profile update now properly refreshes user state in header
+
+### 🎨 UI Improvements
+- Profile header: Large avatar, white text, gradient background
+- User menu: White text on colored backgrounds for visibility
+- Profile button: Purple/blue background with white text
+- Logout button: Solid red background with white text
+- All buttons have hover effects and shadows
+- Full dark mode support
 
 ### 📝 Notes for Next Session
 - Google SSO works on main domain, add www support if needed
 - Use `deploy-with-role.sh` for frontend deployments
 - AWS credentials configured with permanent access keys
 - All Phase 1 account features deployed and working
+- User menu styling complete with proper visibility
