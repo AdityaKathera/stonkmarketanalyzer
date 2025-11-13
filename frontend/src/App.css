@@ -1720,9 +1720,9 @@ html {
 
 .profile-btn {
   padding: 8px 16px;
-  background: rgba(102, 126, 234, 0.1);
-  color: #667eea !important;
-  border: 1px solid rgba(102, 126, 234, 0.3);
+  background: rgba(102, 126, 234, 0.2);
+  color: #ffffff !important;
+  border: 1px solid rgba(102, 126, 234, 0.4);
   border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
@@ -1731,9 +1731,9 @@ html {
 }
 
 .profile-btn:hover {
-  background: rgba(102, 126, 234, 0.2);
+  background: rgba(102, 126, 234, 0.3);
   border-color: #667eea;
-  color: #667eea !important;
+  color: #ffffff !important;
 }
 
 .logout-btn {
@@ -1756,15 +1756,15 @@ html {
 
 /* Dark mode user menu */
 .dark-mode .profile-btn {
-  background: rgba(129, 140, 248, 0.15);
-  color: #a5b4fc !important;
-  border-color: rgba(129, 140, 248, 0.3);
+  background: rgba(129, 140, 248, 0.2);
+  color: #ffffff !important;
+  border-color: rgba(129, 140, 248, 0.4);
 }
 
 .dark-mode .profile-btn:hover {
-  background: rgba(129, 140, 248, 0.25);
+  background: rgba(129, 140, 248, 0.3);
   border-color: #818cf8;
-  color: #c7d2fe !important;
+  color: #ffffff !important;
 }
 
 .dark-mode .logout-btn {
