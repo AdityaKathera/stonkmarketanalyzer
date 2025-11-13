@@ -364,7 +364,7 @@ aws cloudfront create-invalidation --distribution-id E2UZFZ0XAK8XWJ --paths "/*"
 - **Documentation**: `SMART_PORTFOLIO_INSIGHTS_PLAN.md`
 
 ### ✅ AI News Summarizer - COMPLETE (Nov 13, 2024)
-- **Status**: ✅ Deployed and working in production
+- **Status**: ✅ Deployed and working in production (FIXED - Nov 13, 10:40 AM)
 - **Component**: `frontend/src/components/NewsSection.jsx`, `frontend/src/components/NewsSection.css`
 - **Backend Services**: `backend/news_service.py`, `backend/news_summarizer_service.py`
 - **New Endpoints**:
@@ -381,7 +381,8 @@ aws cloudfront create-invalidation --distribution-id E2UZFZ0XAK8XWJ --paths "/*"
   - 🎨 Beautiful modern UI with smooth animations
   - 🌓 Full dark mode support with excellent contrast
   - 📱 Mobile responsive design
-  - 🔗 Fallback news links (Yahoo Finance, Google Finance, MarketWatch)
+  - 🔗 Smart fallback with AI-generated insights when news unavailable
+  - 🌍 International stock support (NSE, BSE, LSE, TSE, etc.)
 - **UI Improvements** (Nov 13, 10:15 AM):
   - Complete redesign with modern card-based layout
   - Smooth fade-in and stagger animations (GPU-accelerated)
@@ -390,13 +391,18 @@ aws cloudfront create-invalidation --distribution-id E2UZFZ0XAK8XWJ --paths "/*"
   - Hover effects with lift and shadow transitions
   - Color-coded badges with gradients
   - Top accent bar animation on card hover
+- **Recent Fixes** (Nov 13, 10:40 AM):
+  - ✅ Fixed Perplexity API model name (now using "sonar")
+  - ✅ AI-generated fallback insights when news unavailable
+  - ✅ International stock support with exchange detection
+  - ✅ Better fallback URLs for global markets
 - **APIs Used**:
   - Alpha Vantage News & Sentiments API (free tier)
-  - Perplexity AI for summarization
-- **Documentation**: `AI_NEWS_SUMMARIZER_COMPLETE.md`, `QUICK_START_NEWS.md`
+  - Perplexity AI for summarization (model: "sonar")
+- **Documentation**: `AI_NEWS_SUMMARIZER_COMPLETE.md`, `QUICK_START_NEWS.md`, `INTERNATIONAL_STOCKS_GUIDE.md`
 
 ### ✅ Social Sentiment Tracker - COMPLETE (Nov 13, 2024)
-- **Status**: ✅ Deployed and working in production
+- **Status**: ✅ Deployed and working in production (FIXED - Nov 13, 10:40 AM)
 - **Component**: `frontend/src/components/SocialSentiment.jsx`, `frontend/src/components/SocialSentiment.css`
 - **Backend Service**: `backend/social_sentiment_service.py`
 - **New Endpoints**:
@@ -416,14 +422,48 @@ aws cloudfront create-invalidation --distribution-id E2UZFZ0XAK8XWJ --paths "/*"
   - 📱 Mobile responsive
   - ⏱️ 4-hour caching for performance
 - **AI Analysis**:
-  - Uses Perplexity API to analyze current social discussions
+  - Uses Perplexity API with "sonar" model
   - Generates sentiment scores and trends
   - Identifies key topics and community mood
   - Provides actionable insights
-- **Documentation**: `SOCIAL_SENTIMENT_PLAN.md`
+- **Recent Fix** (Nov 13, 10:40 AM):
+  - ✅ Fixed Perplexity API model name (changed from deprecated "llama-3.1-sonar-small-128k-online" to "sonar")
+  - ✅ AI sentiment analysis now working correctly
+  - ✅ Real-time social sentiment data displaying properly
+- **Documentation**: `SOCIAL_SENTIMENT_PLAN.md`, `SOCIAL_SENTIMENT_COMPLETE.md`
+
+### 🎯 Session Summary (Nov 13, 2024)
+
+**Features Built Today:**
+1. ✅ AI News Summarizer - Personalized news with AI summaries
+2. ✅ Social Sentiment Tracker - AI-powered sentiment analysis
+3. ✅ International Stock Support - Global markets (NSE, BSE, LSE, etc.)
+4. ✅ Smart Fallback System - AI insights even when data unavailable
+
+**Major Fixes:**
+- ✅ Perplexity API model name (deprecated → "sonar")
+- ✅ International stock ticker validation
+- ✅ Exchange-aware fallback URLs
+- ✅ News UX improvements with better fallback content
+
+**Deployment Status:**
+- ✅ All features deployed to production
+- ✅ Backend running on EC2
+- ✅ Frontend deployed to S3/CloudFront
+- ✅ All changes committed to git
+
+**Documentation Created:**
+- AI_NEWS_SUMMARIZER_COMPLETE.md
+- SOCIAL_SENTIMENT_COMPLETE.md
+- INTERNATIONAL_STOCKS_GUIDE.md
+- SOCIAL_SENTIMENT_PLAN.md
+- QUICK_START_NEWS.md
+
+**Tokens Used:** ~120k / 200k (60%)
+**Tokens Remaining:** ~80k (40%) - Enough for more features!
 
 ### 🎯 Next Task: TBD
-Phase 2 AI Features complete! 118k tokens remaining.
+Phase 2 AI Features complete and working! Ready for Phase 3.
 
 
 ---
@@ -524,4 +564,4 @@ Phase 2 AI Features complete! 118k tokens remaining.
 
 ---
 
-**Last Updated**: November 13, 2024, 10:25 AM UTC (Social Sentiment Tracker deployed)
+**Last Updated**: November 13, 2024, 10:40 AM UTC (Fixed Perplexity API - all AI features now working)
