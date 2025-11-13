@@ -17,7 +17,7 @@ const NewsSection = () => {
       setLoading(true);
       setError(null);
 
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('auth_token');
       const response = await fetch('https://api.stonkmarketanalyzer.com/api/news/watchlist?limit_per_stock=3', {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -48,7 +48,7 @@ const NewsSection = () => {
     try {
       setRefreshing(true);
       
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('auth_token');
       await fetch('https://api.stonkmarketanalyzer.com/api/news/refresh', {
         method: 'POST',
         headers: {
