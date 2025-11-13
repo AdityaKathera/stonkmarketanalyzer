@@ -105,13 +105,21 @@ class NewsService:
         """
         Fallback news when API fails or rate limited
         Provides multiple helpful links for the stock
+        Supports international stocks
         """
         current_time = datetime.now().strftime('%Y%m%dT%H%M%S')
+        
+        # Detect exchange based on ticker patterns
+        exchange = self._detect_exchange(ticker)
+        
+        # Build appropriate URLs
+        yahoo_url = f'https://finance.yahoo.com/quote/{ticker}'
+        google_url = self._get_google_finance_url(ticker, exchange)
         
         return [
             {
                 'title': f'📊 {ticker} Real-Time Market Data & Analysis',
-                'url': f'https://finance.yahoo.com/quote/{ticker}',
+                'url': yahoo_url,
                 'source': 'Yahoo Finance',
                 'time_published': current_time,
                 'summary': f'Access comprehensive real-time data for {ticker} including live price quotes, interactive charts, historical performance, and detailed financial statements.',
@@ -121,7 +129,7 @@ class NewsService:
             },
             {
                 'title': f'📰 Latest {ticker} News & Market Updates',
-                'url': f'https://www.google.com/finance/quote/{ticker}:NYSE',
+                'url': google_url,
                 'source': 'Google Finance',
                 'time_published': current_time,
                 'summary': f'Stay informed with the latest breaking news, earnings reports, analyst ratings, and market-moving events for {ticker}.',
@@ -130,16 +138,61 @@ class NewsService:
                 'sentiment_label': 'Neutral'
             },
             {
-                'title': f'💼 {ticker} Company Profile & Financial Health',
-                'url': f'https://www.marketwatch.com/investing/stock/{ticker.lower()}',
-                'source': 'MarketWatch',
+                'title': f'🔍 {ticker} Stock Research & Information',
+                'url': f'https://www.google.com/search?q={ticker}+stock+news',
+                'source': 'Google Search',
                 'time_published': current_time,
-                'summary': f'Explore detailed company fundamentals, quarterly earnings, balance sheets, and expert analysis for {ticker}.',
+                'summary': f'Search for the latest news, analysis, and market information about {ticker} from multiple sources worldwide.',
                 'banner_image': None,
                 'sentiment_score': 0,
                 'sentiment_label': 'Neutral'
             }
         ][:limit]
+    
+    def _detect_exchange(self, ticker: str) -> str:
+        """
+        Detect stock exchange based on ticker patterns
+        Returns exchange code for Google Finance
+        """
+        ticker_upper = ticker.upper()
+        
+        # Indian stocks (NSE/BSE)
+        if ticker_upper in ['ITC', 'RELIANCE', 'TCS', 'INFY', 'HDFCBANK', 'ICICIBANK', 'SBIN', 'BHARTIARTL', 'HINDUNILVR', 'KOTAKBANK']:
+            return 'NSE'
+        
+        # Check for common suffixes
+        if ticker.endswith('.NS'):  # NSE India
+            return 'NSE'
+        elif ticker.endswith('.BO'):  # BSE India
+            return 'BOM'
+        elif ticker.endswith('.L'):  # London
+            return 'LON'
+        elif ticker.endswith('.TO'):  # Toronto
+            return 'TSE'
+        elif ticker.endswith('.HK'):  # Hong Kong
+            return 'HKG'
+        elif ticker.endswith('.T'):  # Tokyo
+            return 'TYO'
+        elif ticker.endswith('.AX'):  # Australia
+            return 'ASX'
+        elif ticker.endswith('.DE'):  # Germany
+            return 'FRA'
+        elif ticker.endswith('.PA'):  # Paris
+            return 'EPA'
+        
+        # Default to US exchanges
+        return 'NASDAQ'
+    
+    def _get_google_finance_url(self, ticker: str, exchange: str) -> str:
+        """Build Google Finance URL for the appropriate exchange"""
+        # Clean ticker (remove exchange suffix if present)
+        clean_ticker = ticker.split('.')[0].upper()
+        
+        # For Indian stocks, try both NSE and BSE
+        if exchange in ['NSE', 'BOM']:
+            return f'https://www.google.com/finance/quote/{clean_ticker}:NSE'
+        
+        return f'https://www.google.com/finance/quote/{clean_ticker}:{exchange}'
     
     def clear_cache(self):
         """Clear all cached news"""

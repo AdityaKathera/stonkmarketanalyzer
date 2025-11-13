@@ -42,9 +42,14 @@ class StockPriceService:
                 'source': 'yahoo'
             }
         """
-        # Security: Validate ticker format
-        if not ticker or not ticker.isalnum() or len(ticker) > 5:
+        # Security: Validate ticker format (allow dots for international stocks)
+        if not ticker or len(ticker) > 15:
             logger.error(f"Invalid ticker format: {ticker}")
+            return None
+        
+        # Allow alphanumeric and dots (for exchanges like .NS, .BO, .L, etc.)
+        if not all(c.isalnum() or c == '.' or c == '-' for c in ticker):
+            logger.error(f"Invalid ticker characters: {ticker}")
             return None
         
         ticker = ticker.upper()
