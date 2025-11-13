@@ -651,3 +651,112 @@ def set_primary_method():
         'success': True,
         'message': f'Primary authentication method set to {method}'
     }), 200
+
+# ============================================================================
+# NEWS ENDPOINTS - AI News Summarizer
+# ============================================================================
+
+from news_service import get_news_service
+from news_summarizer_service import get_summarizer_service
+
+@auth_bp.route('/api/news/stock/<ticker>', methods=['GET'])
+@require_auth
+def get_stock_news(ticker):
+    """
+    Get AI-summarized news for a specific stock
+    Query params: limit (default: 5)
+    """
+    try:
+        limit = int(request.args.get('limit', 5))
+        
+        # Get news
+        news_service = get_news_service()
+        news_items = news_service.get_news_for_stock(ticker.upper(), limit)
+        
+        # Summarize with AI
+        summarizer = get_summarizer_service()
+        summarized_news = summarizer.summarize_multiple(news_items, ticker.upper())
+        
+        return jsonify({
+            'ticker': ticker.upper(),
+            'news': summarized_news,
+            'count': len(summarized_news)
+        }), 200
+        
+    except Exception as e:
+        print(f"[API] Error fetching news for {ticker}: {e}")
+        return jsonify({'error': 'Failed to fetch news'}), 500
+
+
+@auth_bp.route('/api/news/watchlist', methods=['GET'])
+@require_auth
+def get_watchlist_news():
+    """
+    Get AI-summarized news for all stocks in user's watchlist
+    Query params: limit_per_stock (default: 3)
+    """
+    try:
+        user_id = request.user_id
+        limit_per_stock = int(request.args.get('limit_per_stock', 3))
+        
+        # Get user's watchlist
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            SELECT ticker FROM watchlist 
+            WHERE user_id = ? 
+            ORDER BY added_at DESC
+        ''', (user_id,))
+        
+        watchlist_tickers = [row[0] for row in cursor.fetchall()]
+        conn.close()
+        
+        if not watchlist_tickers:
+            return jsonify({
+                'news': {},
+                'message': 'No stocks in watchlist'
+            }), 200
+        
+        # Get news for all watchlist stocks
+        news_service = get_news_service()
+        summarizer = get_summarizer_service()
+        
+        all_news = {}
+        for ticker in watchlist_tickers[:10]:  # Limit to 10 stocks to avoid rate limits
+            news_items = news_service.get_news_for_stock(ticker, limit_per_stock)
+            summarized = summarizer.summarize_multiple(news_items, ticker)
+            all_news[ticker] = summarized
+        
+        return jsonify({
+            'news': all_news,
+            'tickers': watchlist_tickers[:10],
+            'count': len(all_news)
+        }), 200
+        
+    except Exception as e:
+        print(f"[API] Error fetching watchlist news: {e}")
+        return jsonify({'error': 'Failed to fetch watchlist news'}), 500
+
+
+@auth_bp.route('/api/news/refresh', methods=['POST'])
+@require_auth
+def refresh_news_cache():
+    """
+    Clear news cache to force refresh
+    """
+    try:
+        news_service = get_news_service()
+        summarizer = get_summarizer_service()
+        
+        news_service.clear_cache()
+        summarizer.clear_cache()
+        
+        return jsonify({
+            'success': True,
+            'message': 'News cache cleared'
+        }), 200
+        
+    except Exception as e:
+        print(f"[API] Error clearing cache: {e}")
+        return jsonify({'error': 'Failed to clear cache'}), 500

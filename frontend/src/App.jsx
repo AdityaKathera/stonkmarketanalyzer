@@ -5,12 +5,13 @@ import StockComparison from './components/StockComparison'
 import Watchlist from './components/Watchlist'
 import Portfolio from './components/PortfolioEnhanced'
 import Profile from './components/Profile'
+import NewsSection from './components/NewsSection'
 import AuthModal from './components/AuthModal'
 import analytics from './analytics'
 import './App.css'
 
 function App() {
-  const [mode, setMode] = useState('guided') // 'guided', 'chat', 'compare', 'watchlist', 'portfolio', 'profile'
+  const [mode, setMode] = useState('guided') // 'guided', 'chat', 'compare', 'watchlist', 'portfolio', 'profile', 'news'
   const [ticker, setTicker] = useState('')
   const [horizon, setHorizon] = useState('1-3 years')
   const [riskLevel, setRiskLevel] = useState('moderate')
@@ -222,6 +223,12 @@ function App() {
                 💼 Portfolio
               </button>
               <button
+                className={mode === 'news' ? 'active' : ''}
+                onClick={() => handleModeChange('news')}
+              >
+                📰 News
+              </button>
+              <button
                 className={mode === 'profile' ? 'active' : ''}
                 onClick={() => handleModeChange('profile')}
               >
@@ -247,6 +254,9 @@ function App() {
         )}
         {mode === 'portfolio' && user && (
           <Portfolio user={user} />
+        )}
+        {mode === 'news' && user && (
+          <NewsSection />
         )}
         {mode === 'profile' && user && (
           <Profile user={user} onUpdateUser={handleUpdateUser} />
