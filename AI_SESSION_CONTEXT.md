@@ -204,13 +204,21 @@ ssh -i /Users/adityakathera/Downloads/stonkmarketanalyzer-keypair.pem ec2-user@1
 - **New Endpoints**:
   - `PUT /api/auth/profile` - Update user name
   - `POST /api/auth/change-password` - Change password
+  - `GET /api/auth/me` - Get full user data (used by profile page)
 - **Features**:
   - **Remember Me**: Checkbox on login (7 days vs 30 days JWT)
   - **Profile Page**: View/edit name, change password, account stats
+  - **Profile Header**: Large avatar (100px), prominent name (32px), badges, email icon
   - **Profile Tabs**: Profile Info & Security
+  - **Account Stats**: Member since date, last login time with icons (📅 🕐)
   - **User Menu**: Profile button in header, logout button
   - **Dark Mode**: Full support throughout
   - **Responsive**: Mobile-friendly design
+- **Recent Fixes** (Nov 13, 2024):
+  - ✅ Fixed N/A dates by fetching full user data from `/api/auth/me`
+  - ✅ Improved profile header design (larger, more visible)
+  - ✅ Added profile badges and stat icons
+  - ✅ Better date formatting with fallbacks
 - **Documentation**: See `PHASE1_ACCOUNT_FEATURES.md` and `PHASE1_DEPLOYMENT_COMPLETE.md`
 - **Status**: ✅ Deployed and working in production
 
@@ -256,4 +264,4 @@ aws cloudfront create-invalidation --distribution-id E2UZFZ0XAK8XWJ --paths "/*"
 - **GOOGLE_SSO_TROUBLESHOOTING.md** - Google OAuth error solutions
 - **TROUBLESHOOTING_DEPLOYMENT.md** - General deployment issues
 
-**Last Updated**: November 13, 2024 (Phase 1 Account Features Deployed)
+**Last Updated**: November 13, 2024 (Phase 1 Account Features - Profile UI Improvements)
