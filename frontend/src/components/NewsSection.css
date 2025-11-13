@@ -38,10 +38,7 @@
 .news-header h2 {
   font-size: 32px;
   font-weight: 800;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #1e293b;
   margin: 0;
   letter-spacing: -0.5px;
 }
@@ -110,7 +107,7 @@
 .filter-btn {
   padding: 10px 20px;
   background: rgba(102, 126, 234, 0.08);
-  color: #667eea;
+  color: #5b6fd8;
   border: 2px solid rgba(102, 126, 234, 0.2);
   border-radius: 24px;
   font-size: 14px;
@@ -123,13 +120,14 @@
 .filter-btn:hover {
   border-color: #667eea;
   background: rgba(102, 126, 234, 0.15);
+  color: #4c5fd1;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
 }
 
 .filter-btn.active {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  color: white !important;
   border-color: transparent;
   box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
   transform: translateY(-2px);
