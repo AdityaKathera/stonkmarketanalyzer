@@ -35,9 +35,28 @@ def init_db():
             name TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             last_login TIMESTAMP,
-            email_verified BOOLEAN DEFAULT 1
+            email_verified BOOLEAN DEFAULT 1,
+            google_id TEXT,
+            auth_provider TEXT DEFAULT 'email',
+            primary_auth_method TEXT DEFAULT 'email'
         )
     ''')
+    
+    # Add new columns to existing tables (migration)
+    try:
+        c.execute('ALTER TABLE users ADD COLUMN google_id TEXT')
+    except sqlite3.OperationalError:
+        pass  # Column already exists
+    
+    try:
+        c.execute('ALTER TABLE users ADD COLUMN auth_provider TEXT DEFAULT "email"')
+    except sqlite3.OperationalError:
+        pass
+    
+    try:
+        c.execute('ALTER TABLE users ADD COLUMN primary_auth_method TEXT DEFAULT "email"')
+    except sqlite3.OperationalError:
+        pass
     
     # Portfolio table
     c.execute('''
@@ -196,3 +215,142 @@ def update_user_password(user_id, new_password):
         return True
     except Exception:
         return False
+
+def get_user_by_google_id(google_id):
+    """Get user by Google ID"""
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute('SELECT * FROM users WHERE google_id = ?', (google_id,))
+    user = c.fetchone()
+    conn.close()
+    return user
+
+def link_google_account(user_id, google_id):
+    """Link Google account to existing user"""
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        
+        # Check if Google ID is already linked to another account
+        existing = get_user_by_google_id(google_id)
+        if existing and existing[0] != user_id:
+            conn.close()
+            return False, "This Google account is already linked to another user"
+        
+        # Update auth_provider to 'both' if currently 'email'
+        c.execute('SELECT auth_provider FROM users WHERE id = ?', (user_id,))
+        current_provider = c.fetchone()[0]
+        
+        new_provider = 'both' if current_provider == 'email' else 'google'
+        
+        c.execute('''
+            UPDATE users 
+            SET google_id = ?, auth_provider = ?
+            WHERE id = ?
+        ''', (google_id, new_provider, user_id))
+        
+        conn.commit()
+        conn.close()
+        return True, None
+    except Exception as e:
+        return False, str(e)
+
+def unlink_google_account(user_id):
+    """Unlink Google account from user"""
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        
+        # Check if user has password (can't unlink if Google is only method)
+        c.execute('SELECT password_hash, auth_provider FROM users WHERE id = ?', (user_id,))
+        result = c.fetchone()
+        
+        if not result:
+            conn.close()
+            return False, "User not found"
+        
+        password_hash, auth_provider = result
+        
+        # If auth_provider is 'google', user must have a password first
+        if auth_provider == 'google':
+            conn.close()
+            return False, "Cannot unlink Google account. Please set a password first."
+        
+        # Update to remove Google ID and set provider to 'email'
+        c.execute('''
+            UPDATE users 
+            SET google_id = NULL, auth_provider = 'email', primary_auth_method = 'email'
+            WHERE id = ?
+        ''', (user_id,))
+        
+        conn.commit()
+        conn.close()
+        return True, None
+    except Exception as e:
+        return False, str(e)
+
+def get_linked_accounts(user_id):
+    """Get list of linked authentication providers"""
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute('SELECT google_id, auth_provider, primary_auth_method FROM users WHERE id = ?', (user_id,))
+    result = c.fetchone()
+    conn.close()
+    
+    if not result:
+        return []
+    
+    google_id, auth_provider, primary_auth_method = result
+    
+    linked = []
+    
+    # Email/password is always available if auth_provider includes it
+    if auth_provider in ['email', 'both']:
+        linked.append({
+            'provider': 'email',
+            'is_primary': primary_auth_method == 'email',
+            'linked_at': None  # Could add timestamp if needed
+        })
+    
+    # Google account
+    if google_id:
+        linked.append({
+            'provider': 'google',
+            'is_primary': primary_auth_method == 'google',
+            'google_id': google_id,
+            'linked_at': None
+        })
+    
+    return linked
+
+def set_primary_auth_method(user_id, method):
+    """Set primary authentication method"""
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        
+        # Verify the method is actually linked
+        c.execute('SELECT auth_provider, google_id FROM users WHERE id = ?', (user_id,))
+        result = c.fetchone()
+        
+        if not result:
+            conn.close()
+            return False, "User not found"
+        
+        auth_provider, google_id = result
+        
+        # Validate the method is available
+        if method == 'google' and not google_id:
+            conn.close()
+            return False, "Google account is not linked"
+        
+        if method == 'email' and auth_provider not in ['email', 'both']:
+            conn.close()
+            return False, "Email authentication is not available"
+        
+        c.execute('UPDATE users SET primary_auth_method = ? WHERE id = ?', (method, user_id))
+        conn.commit()
+        conn.close()
+        return True, None
+    except Exception as e:
+        return False, str(e)

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { GoogleOAuthProvider, useGoogleLogin } from '@react-oauth/google';
 import './Profile.css';
 
 function Profile({ user, onUpdateUser }) {
@@ -6,6 +7,7 @@ function Profile({ user, onUpdateUser }) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
   const [fullUserData, setFullUserData] = useState(null);
+  const [linkedAccounts, setLinkedAccounts] = useState([]);
   
   // Profile info state
   const [name, setName] = useState(user?.name || '');
@@ -17,7 +19,7 @@ function Profile({ user, onUpdateUser }) {
     confirm_password: ''
   });
 
-  // Fetch full user data on mount
+  // Fetch full user data and linked accounts on mount
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -41,7 +43,29 @@ function Profile({ user, onUpdateUser }) {
       }
     };
     
+    const fetchLinkedAccounts = async () => {
+      try {
+        const token = localStorage.getItem('auth_token');
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/auth/linked-accounts`,
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          }
+        );
+        
+        if (response.ok) {
+          const data = await response.json();
+          setLinkedAccounts(data.linked_accounts || []);
+        }
+      } catch (err) {
+        console.error('Failed to fetch linked accounts:', err);
+      }
+    };
+    
     fetchUserData();
+    fetchLinkedAccounts();
   }, []);
 
   useEffect(() => {
@@ -163,7 +187,157 @@ function Profile({ user, onUpdateUser }) {
     }
   };
 
+  const handleLinkGoogle = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      try {
+        setLoading(true);
+        setMessage({ type: '', text: '' });
+        
+        const token = localStorage.getItem('auth_token');
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/auth/link-google`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ token: tokenResponse.access_token })
+          }
+        );
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to link Google account');
+        }
+        
+        setMessage({ type: 'success', text: 'Google account linked successfully!' });
+        
+        // Refresh linked accounts
+        const accountsResponse = await fetch(
+          `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/auth/linked-accounts`,
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          }
+        );
+        
+        if (accountsResponse.ok) {
+          const accountsData = await accountsResponse.json();
+          setLinkedAccounts(accountsData.linked_accounts || []);
+        }
+      } catch (err) {
+        setMessage({ type: 'error', text: err.message });
+      } finally {
+        setLoading(false);
+      }
+    },
+    onError: () => {
+      setMessage({ type: 'error', text: 'Failed to authenticate with Google' });
+    }
+  });
+
+  const handleUnlinkGoogle = async () => {
+    if (!confirm('Are you sure you want to unlink your Google account?')) {
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      setMessage({ type: '', text: '' });
+      
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/auth/unlink-google`,
+        {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to unlink Google account');
+      }
+      
+      setMessage({ type: 'success', text: 'Google account unlinked successfully!' });
+      
+      // Refresh linked accounts
+      const accountsResponse = await fetch(
+        `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/auth/linked-accounts`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+      
+      if (accountsResponse.ok) {
+        const accountsData = await accountsResponse.json();
+        setLinkedAccounts(accountsData.linked_accounts || []);
+      }
+    } catch (err) {
+      setMessage({ type: 'error', text: err.message });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSetPrimaryMethod = async (method) => {
+    try {
+      setLoading(true);
+      setMessage({ type: '', text: '' });
+      
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/auth/primary-method`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ method })
+        }
+      );
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to set primary method');
+      }
+      
+      setMessage({ type: 'success', text: `Primary login method set to ${method}` });
+      
+      // Refresh linked accounts
+      const accountsResponse = await fetch(
+        `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/auth/linked-accounts`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+      
+      if (accountsResponse.ok) {
+        const accountsData = await accountsResponse.json();
+        setLinkedAccounts(accountsData.linked_accounts || []);
+      }
+    } catch (err) {
+      setMessage({ type: 'error', text: err.message });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const displayUser = fullUserData || user;
+  const hasGoogleLinked = linkedAccounts.some(acc => acc.provider === 'google');
+  const hasEmailLinked = linkedAccounts.some(acc => acc.provider === 'email');
 
   return (
     <div className="profile-container">
@@ -198,6 +372,12 @@ function Profile({ user, onUpdateUser }) {
           onClick={() => setActiveTab('security')}
         >
           🔒 Security
+        </button>
+        <button
+          className={activeTab === 'linked' ? 'active' : ''}
+          onClick={() => setActiveTab('linked')}
+        >
+          🔗 Linked Accounts
         </button>
       </div>
 
@@ -320,8 +500,91 @@ function Profile({ user, onUpdateUser }) {
           </form>
         </div>
       )}
+
+      {activeTab === 'linked' && (
+        <div className="profile-section">
+          <h3>Linked Accounts</h3>
+          <p className="section-description">
+            Manage your login methods. You can link multiple accounts and choose your preferred login method.
+          </p>
+          
+          <div className="linked-accounts-list">
+            {linkedAccounts.map((account) => (
+              <div key={account.provider} className="linked-account-card">
+                <div className="account-info">
+                  <div className="account-icon">
+                    {account.provider === 'google' ? '🔵' : '📧'}
+                  </div>
+                  <div className="account-details">
+                    <h4>
+                      {account.provider === 'google' ? 'Google Account' : 'Email & Password'}
+                      {account.is_primary && <span className="primary-badge">Primary</span>}
+                    </h4>
+                    <p className="account-email">{displayUser?.email}</p>
+                  </div>
+                </div>
+                <div className="account-actions">
+                  {!account.is_primary && linkedAccounts.length > 1 && (
+                    <button
+                      className="set-primary-btn"
+                      onClick={() => handleSetPrimaryMethod(account.provider)}
+                      disabled={loading}
+                    >
+                      Set as Primary
+                    </button>
+                  )}
+                  {account.provider === 'google' && linkedAccounts.length > 1 && (
+                    <button
+                      className="unlink-btn"
+                      onClick={handleUnlinkGoogle}
+                      disabled={loading}
+                    >
+                      Unlink
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {!hasGoogleLinked && (
+            <div className="link-account-section">
+              <h4>Link Additional Account</h4>
+              <p>Connect your Google account for easier sign-in</p>
+              <button
+                className="link-google-btn"
+                onClick={() => handleLinkGoogle()}
+                disabled={loading}
+              >
+                <span className="google-icon">🔵</span>
+                Link Google Account
+              </button>
+            </div>
+          )}
+
+          <div className="linked-accounts-info">
+            <p>ℹ️ You must have at least one login method linked to your account.</p>
+            <p>💡 Your primary method is the recommended way to sign in.</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-export default Profile;
+// Wrap with GoogleOAuthProvider
+function ProfileWithProvider(props) {
+  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+  
+  if (!clientId) {
+    return <Profile {...props} />;
+  }
+  
+  return (
+    <GoogleOAuthProvider clientId={clientId}>
+      <Profile {...props} />
+    </GoogleOAuthProvider>
+  );
+}
+
+export default ProfileWithProvider;

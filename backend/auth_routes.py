@@ -466,6 +466,7 @@ def google_auth():
     """Authenticate with Google OAuth"""
     from google.oauth2 import id_token
     from google.auth.transport import requests as google_requests
+    from auth_service import get_user_by_google_id
     
     data = request.json
     token = data.get('token')
@@ -487,21 +488,38 @@ def google_auth():
         name = idinfo.get('name', '')
         google_id = idinfo['sub']
         
-        # Check if user exists
-        user = get_user_by_email(email)
+        # Check if Google ID is already linked to an account
+        user_by_google = get_user_by_google_id(google_id)
         
-        if user:
-            # Existing user - login
-            user_id = user[0]
+        if user_by_google:
+            # User has linked Google account - login
+            user_id = user_by_google[0]
             update_last_login(user_id)
         else:
-            # New user - create account
-            # Generate a random password (won't be used for Google auth)
-            random_password = secrets.token_urlsafe(32)
-            user_id = create_user(email, random_password, name)
+            # Check if email exists (for potential linking)
+            user_by_email = get_user_by_email(email)
             
-            if not user_id:
-                return jsonify({'error': 'Failed to create user'}), 500
+            if user_by_email:
+                # Email exists but Google not linked - auto-link and login
+                user_id = user_by_email[0]
+                from auth_service import link_google_account
+                success, error = link_google_account(user_id, google_id)
+                
+                if not success:
+                    return jsonify({'error': error}), 400
+                
+                update_last_login(user_id)
+            else:
+                # New user - create account with Google
+                random_password = secrets.token_urlsafe(32)
+                user_id = create_user(email, random_password, name)
+                
+                if not user_id:
+                    return jsonify({'error': 'Failed to create user'}), 500
+                
+                # Link Google ID to new account
+                from auth_service import link_google_account
+                link_google_account(user_id, google_id)
         
         # Generate JWT token
         jwt_token = generate_token(user_id, email)
@@ -521,3 +539,104 @@ def google_auth():
         return jsonify({'error': 'Invalid Google token'}), 401
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+# Account Linking Routes
+
+@auth_bp.route('/api/auth/linked-accounts', methods=['GET'])
+@require_auth
+def get_linked_accounts_route():
+    """Get list of linked authentication providers"""
+    from auth_service import get_linked_accounts
+    
+    linked = get_linked_accounts(request.user_id)
+    
+    return jsonify({
+        'linked_accounts': linked
+    }), 200
+
+@auth_bp.route('/api/auth/link-google', methods=['POST'])
+@require_auth
+def link_google():
+    """Link Google account to current user"""
+    from google.oauth2 import id_token
+    from google.auth.transport import requests as google_requests
+    from auth_service import link_google_account
+    
+    data = request.json
+    token = data.get('token')
+    
+    if not token:
+        return jsonify({'error': 'Google token is required'}), 400
+    
+    try:
+        # Verify Google token
+        CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
+        idinfo = id_token.verify_oauth2_token(
+            token, 
+            google_requests.Request(), 
+            CLIENT_ID
+        )
+        
+        google_id = idinfo['sub']
+        google_email = idinfo['email']
+        
+        # Verify the Google email matches the user's email
+        user = get_user_by_id(request.user_id)
+        if user[1] != google_email:
+            return jsonify({
+                'error': 'Google account email does not match your account email'
+            }), 400
+        
+        # Link the account
+        success, error = link_google_account(request.user_id, google_id)
+        
+        if not success:
+            return jsonify({'error': error}), 400
+        
+        return jsonify({
+            'success': True,
+            'message': 'Google account linked successfully'
+        }), 200
+        
+    except ValueError:
+        return jsonify({'error': 'Invalid Google token'}), 401
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@auth_bp.route('/api/auth/unlink-google', methods=['DELETE'])
+@require_auth
+def unlink_google():
+    """Unlink Google account from current user"""
+    from auth_service import unlink_google_account
+    
+    success, error = unlink_google_account(request.user_id)
+    
+    if not success:
+        return jsonify({'error': error}), 400
+    
+    return jsonify({
+        'success': True,
+        'message': 'Google account unlinked successfully'
+    }), 200
+
+@auth_bp.route('/api/auth/primary-method', methods=['PUT'])
+@require_auth
+def set_primary_method():
+    """Set primary authentication method"""
+    from auth_service import set_primary_auth_method
+    
+    data = request.json
+    method = data.get('method')
+    
+    if method not in ['email', 'google']:
+        return jsonify({'error': 'Invalid authentication method'}), 400
+    
+    success, error = set_primary_auth_method(request.user_id, method)
+    
+    if not success:
+        return jsonify({'error': error}), 400
+    
+    return jsonify({
+        'success': True,
+        'message': f'Primary authentication method set to {method}'
+    }), 200

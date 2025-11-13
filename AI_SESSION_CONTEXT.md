@@ -307,9 +307,23 @@ aws cloudfront create-invalidation --distribution-id E2UZFZ0XAK8XWJ --paths "/*"
 - All Phase 1 account features deployed and working
 - User menu styling complete with proper visibility
 
-### 🎯 Next Task: Account Linking
-**User wants to build:** Account Linking feature (see `NEXT_SESSION_TASK.md`)
-- Allow users to link Google account to existing email/password account
-- Show linked providers in Profile page
-- Prevent duplicate accounts
-- Estimated time: 2-3 hours
+### ✅ Account Linking - COMPLETE (Nov 13, 2024)
+- **Status**: ✅ Deployed and ready for testing
+- **Component**: `frontend/src/components/Profile.jsx` (Linked Accounts tab)
+- **Backend**: `backend/auth_service.py`, `backend/auth_routes.py`
+- **New Endpoints**:
+  - `GET /api/auth/linked-accounts` - Get linked providers
+  - `POST /api/auth/link-google` - Link Google to account
+  - `DELETE /api/auth/unlink-google` - Unlink Google
+  - `PUT /api/auth/primary-method` - Set primary login method
+- **Database**: Added `google_id`, `auth_provider`, `primary_auth_method` columns
+- **Features**:
+  - Link/unlink Google account
+  - Set primary authentication method
+  - Auto-linking on Google sign-in
+  - Validation (must keep at least one method)
+  - Full dark mode support
+- **Documentation**: See `ACCOUNT_LINKING_COMPLETE.md`
+
+### 🎯 Next Task: TBD
+Ready for new features or improvements!
