@@ -106,33 +106,35 @@ class NewsService:
         Fallback news when API fails or rate limited
         Provides multiple helpful links for the stock
         """
+        current_time = datetime.now().strftime('%Y%m%dT%H%M%S')
+        
         return [
             {
-                'title': f'{ticker} Stock Overview and Latest Updates',
+                'title': f'📊 {ticker} Real-Time Market Data & Analysis',
                 'url': f'https://finance.yahoo.com/quote/{ticker}',
                 'source': 'Yahoo Finance',
-                'time_published': datetime.now().strftime('%Y%m%dT%H%M%S'),
-                'summary': f'View real-time stock price, charts, and financial data for {ticker}. Get the latest market updates and analysis.',
+                'time_published': current_time,
+                'summary': f'Access comprehensive real-time data for {ticker} including live price quotes, interactive charts, historical performance, and detailed financial statements.',
                 'banner_image': None,
                 'sentiment_score': 0,
                 'sentiment_label': 'Neutral'
             },
             {
-                'title': f'{ticker} News and Analysis',
+                'title': f'📰 Latest {ticker} News & Market Updates',
                 'url': f'https://www.google.com/finance/quote/{ticker}:NYSE',
                 'source': 'Google Finance',
-                'time_published': datetime.now().strftime('%Y%m%dT%H%M%S'),
-                'summary': f'Latest news, financial reports, and market analysis for {ticker} stock.',
+                'time_published': current_time,
+                'summary': f'Stay informed with the latest breaking news, earnings reports, analyst ratings, and market-moving events for {ticker}.',
                 'banner_image': None,
                 'sentiment_score': 0,
                 'sentiment_label': 'Neutral'
             },
             {
-                'title': f'{ticker} Company Profile and Financials',
+                'title': f'💼 {ticker} Company Profile & Financial Health',
                 'url': f'https://www.marketwatch.com/investing/stock/{ticker.lower()}',
                 'source': 'MarketWatch',
-                'time_published': datetime.now().strftime('%Y%m%dT%H%M%S'),
-                'summary': f'Comprehensive financial information, earnings reports, and market data for {ticker}.',
+                'time_published': current_time,
+                'summary': f'Explore detailed company fundamentals, quarterly earnings, balance sheets, and expert analysis for {ticker}.',
                 'banner_image': None,
                 'sentiment_score': 0,
                 'sentiment_label': 'Neutral'

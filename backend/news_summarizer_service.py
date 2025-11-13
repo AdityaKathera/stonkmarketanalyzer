@@ -53,18 +53,29 @@ class NewsSummarizerService:
             
         except Exception as e:
             print(f"[NewsSummarizer] Error: {e}")
-            # Return with fallback data
-            return {
-                **news_item,
-                'ai_summary': news_item.get('summary', 'Summary not available'),
-                'ai_sentiment': self._parse_sentiment(news_item.get('sentiment_label', 'Neutral')),
-                'ai_impact': 'Low',
-                'key_points': [
-                    'Click to view full details',
-                    'Real-time market data available',
-                    'Check for latest updates'
-                ]
-            }
+            # Try to generate insights even without news article
+            try:
+                fallback_insights = self._generate_fallback_insights(ticker)
+                return {
+                    **news_item,
+                    'ai_summary': fallback_insights['summary'],
+                    'ai_sentiment': fallback_insights['sentiment'],
+                    'ai_impact': fallback_insights['impact'],
+                    'key_points': fallback_insights['key_points']
+                }
+            except:
+                # Ultimate fallback
+                return {
+                    **news_item,
+                    'ai_summary': news_item.get('summary', 'Summary not available'),
+                    'ai_sentiment': self._parse_sentiment(news_item.get('sentiment_label', 'Neutral')),
+                    'ai_impact': 'Low',
+                    'key_points': [
+                        'Click to view full details',
+                        'Real-time market data available',
+                        'Check for latest updates'
+                    ]
+                }
     
     def summarize_multiple(self, news_items: List[Dict], ticker: str) -> List[Dict]:
         """Summarize multiple news articles"""
@@ -174,6 +185,89 @@ KEY_POINTS:
             return 'Bearish'
         else:
             return 'Neutral'
+    
+    def _generate_fallback_insights(self, ticker: str) -> Dict:
+        """Generate AI insights even when news isn't available"""
+        prompt = f"""Provide a brief market update for {ticker} stock.
+
+Include:
+1. Current market sentiment (Bullish/Bearish/Neutral)
+2. Potential impact on stock price (High/Medium/Low)
+3. 2-3 key points investors should know
+
+Format:
+SENTIMENT: [Bullish/Bearish/Neutral]
+IMPACT: [High/Medium/Low]
+SUMMARY: [2 sentences about current state]
+KEY_POINTS:
+- [point 1]
+- [point 2]
+- [point 3]"""
+
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json"
+        }
+        
+        payload = {
+            "model": "llama-3.1-sonar-small-128k-online",
+            "messages": [
+                {
+                    "role": "system",
+                    "content": "You are a financial analyst providing concise market updates."
+                },
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ],
+            "temperature": 0.3,
+            "max_tokens": 250
+        }
+        
+        response = requests.post(self.api_url, json=payload, headers=headers, timeout=15)
+        response.raise_for_status()
+        
+        result = response.json()
+        content = result['choices'][0]['message']['content']
+        
+        # Parse response
+        lines = content.split('\n')
+        sentiment = 'Neutral'
+        impact = 'Medium'
+        summary = ''
+        key_points = []
+        current_section = None
+        
+        for line in lines:
+            line = line.strip()
+            if not line:
+                continue
+            
+            if line.startswith('SENTIMENT:'):
+                sentiment = line.replace('SENTIMENT:', '').strip()
+            elif line.startswith('IMPACT:'):
+                impact = line.replace('IMPACT:', '').strip()
+            elif line.startswith('SUMMARY:'):
+                summary = line.replace('SUMMARY:', '').strip()
+                current_section = 'summary'
+            elif line.startswith('KEY_POINTS:'):
+                current_section = 'key_points'
+            elif line.startswith('-') and current_section == 'key_points':
+                key_points.append(line.replace('-', '').strip())
+            elif current_section == 'summary' and not summary:
+                summary = line
+        
+        return {
+            'summary': summary or f"Market update for {ticker} - check the link for latest information.",
+            'sentiment': sentiment,
+            'impact': impact,
+            'key_points': key_points[:3] if key_points else [
+                'Check latest market data',
+                'Review recent price action',
+                'Monitor key support levels'
+            ]
+        }
     
     def clear_cache(self):
         """Clear all cached summaries"""
