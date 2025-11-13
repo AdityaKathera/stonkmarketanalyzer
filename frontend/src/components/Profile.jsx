@@ -73,10 +73,16 @@ function Profile({ user, onUpdateUser }) {
         throw new Error(data.error || 'Failed to update profile');
       }
 
-      // Update local user data
-      const updatedUser = { ...user, name: data.name };
+      // Update local user data with full user object
+      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+      const updatedUser = { ...currentUser, name: data.name };
       localStorage.setItem('user', JSON.stringify(updatedUser));
+      
+      // Update parent component state
       onUpdateUser(updatedUser);
+      
+      // Also update fullUserData state
+      setFullUserData(prev => ({ ...prev, name: data.name }));
 
       setMessage({ type: 'success', text: 'Profile updated successfully!' });
     } catch (err) {
