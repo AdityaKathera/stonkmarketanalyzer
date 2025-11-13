@@ -173,6 +173,49 @@ ssh -i /Users/adityakathera/Downloads/stonkmarketanalyzer-keypair.pem ec2-user@1
 
 ---
 
+## 🆕 Latest Features Deployed (November 13, 2024)
+
+### ✅ Google SSO - LIVE
+- **Client ID**: `735745800847-od596kg5vp2v7k66ghk7n1n5vndh8e0s.apps.googleusercontent.com`
+- **Status**: Deployed to production
+- **Files**: `frontend/src/components/AuthModal.jsx`, `backend/auth_routes.py`
+- **Package**: `@react-oauth/google` installed
+- **Backend Endpoint**: `/api/auth/google`
+
+### ✅ Enhanced Portfolio - LIVE
+- **Component**: `frontend/src/components/PortfolioEnhanced.jsx`
+- **Backend Service**: `backend/portfolio_service.py`
+- **New Endpoints**: 
+  - `/api/portfolio/summary` - Real-time prices and metrics
+  - `/api/portfolio/allocation` - Portfolio breakdown
+- **Features**: 
+  - Real-time stock prices (1-min cache)
+  - Automatic P/L calculations
+  - Portfolio summary cards
+  - Auto-refresh every 60 seconds
+  - Color-coded performance
+
+### ⚠️ CloudFront Cache - TEMPORARY SETTING
+- **Distribution ID**: E2UZFZ0XAK8XWJ
+- **Current TTL**: 0 seconds (no caching)
+- **Reason**: Faster deployments during testing
+- **Action Required**: Restore to 3600 seconds (1 hour) after testing
+- **Restore Commands**: See `CLOUDFRONT_CACHE_REMINDER.md`
+- **Note**: Stock data caching (backend) is separate and unaffected
+
+### Frontend Deployment (S3 + CloudFront)
+```bash
+cd frontend
+npm run build
+aws s3 sync dist/ s3://stonkmarketanalyzer-frontend/ --delete
+aws cloudfront create-invalidation --distribution-id E2UZFZ0XAK8XWJ --paths "/*"
+```
+
+**S3 Bucket**: `stonkmarketanalyzer-frontend`  
+**CloudFront**: E2UZFZ0XAK8XWJ
+
+---
+
 ## For AI Assistants: How to Use This Context
 
 1. **Read this file first** when starting a new session about deployment
@@ -180,5 +223,7 @@ ssh -i /Users/adityakathera/Downloads/stonkmarketanalyzer-keypair.pem ec2-user@1
 3. **Always use the SSH key** - Don't try AWS SSM or other methods
 4. **Check backend logs** if something doesn't work
 5. **Refer to DEPLOYMENT_QUICKSTART.md** for more detailed information
+6. **New Features**: Google SSO and Enhanced Portfolio are deployed
+7. **CloudFront**: Cache is temporarily 0 - restore after testing
 
 **Last Updated**: November 13, 2024

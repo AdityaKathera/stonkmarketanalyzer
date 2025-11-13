@@ -73,6 +73,28 @@ If you're the project owner:
 - Admin Portal: Fully functional with real-time analytics
 - Security: Multi-layer authentication and rate limiting
 
+## 🆕 Latest Features (November 13, 2024)
+
+### Google SSO
+- One-click sign-in with Google
+- Automatic account creation
+- No password needed
+- OAuth 2.0 secure flow
+
+### Enhanced Portfolio
+- Real-time stock prices (1-minute cache)
+- Automatic P/L calculations
+- Portfolio summary dashboard
+- Best/worst performer tracking
+- Auto-refresh every 60 seconds
+- Color-coded performance indicators
+
+### CloudFront Configuration
+⚠️ **IMPORTANT**: CloudFront cache temporarily set to 0 for testing
+- See `CLOUDFRONT_CACHE_REMINDER.md` for details
+- **Must restore to 1 hour after testing**
+- Stock data caching (backend) is separate and unaffected
+
 ---
 
 **Last Updated**: November 13, 2024
