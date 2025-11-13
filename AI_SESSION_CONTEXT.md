@@ -181,8 +181,10 @@ ssh -i /Users/adityakathera/Downloads/stonkmarketanalyzer-keypair.pem ec2-user@1
 - **Files**: `frontend/src/components/AuthModal.jsx`, `backend/auth_routes.py`
 - **Package**: `@react-oauth/google` installed
 - **Backend Endpoint**: `/api/auth/google`
+- **Troubleshooting**: See `GOOGLE_SSO_TROUBLESHOOTING.md` for common issues
+- **Common Issue**: "Access blocked" error - Add email to test users in Google Console
 
-### ✅ Enhanced Portfolio - LIVE
+### ✅ Enhanced Portfolio - LIVE & WORKING
 - **Component**: `frontend/src/components/PortfolioEnhanced.jsx`
 - **Backend Service**: `backend/portfolio_service.py`
 - **New Endpoints**: 
@@ -194,6 +196,7 @@ ssh -i /Users/adityakathera/Downloads/stonkmarketanalyzer-keypair.pem ec2-user@1
   - Portfolio summary cards
   - Auto-refresh every 60 seconds
   - Color-coded performance
+- **Status**: ✅ Fully functional and tested
 
 ### ⚠️ CloudFront Cache - TEMPORARY SETTING
 - **Distribution ID**: E2UZFZ0XAK8XWJ
@@ -207,11 +210,11 @@ ssh -i /Users/adityakathera/Downloads/stonkmarketanalyzer-keypair.pem ec2-user@1
 ```bash
 cd frontend
 npm run build
-aws s3 sync dist/ s3://stonkmarketanalyzer-frontend/ --delete
+aws s3 sync dist/ s3://stonkmarketanalyzer-frontend-1762843094/ --delete
 aws cloudfront create-invalidation --distribution-id E2UZFZ0XAK8XWJ --paths "/*"
 ```
 
-**S3 Bucket**: `stonkmarketanalyzer-frontend`  
+**S3 Bucket**: `stonkmarketanalyzer-frontend-1762843094`  
 **CloudFront**: E2UZFZ0XAK8XWJ
 
 ---
@@ -223,7 +226,16 @@ aws cloudfront create-invalidation --distribution-id E2UZFZ0XAK8XWJ --paths "/*"
 3. **Always use the SSH key** - Don't try AWS SSM or other methods
 4. **Check backend logs** if something doesn't work
 5. **Refer to DEPLOYMENT_QUICKSTART.md** for more detailed information
-6. **New Features**: Google SSO and Enhanced Portfolio are deployed
+6. **New Features**: Google SSO and Enhanced Portfolio are deployed and working
 7. **CloudFront**: Cache is temporarily 0 - restore after testing
+8. **Google SSO Issues**: Check `GOOGLE_SSO_TROUBLESHOOTING.md` for solutions
+
+## Key Documentation Files
+
+- **START_HERE.md** - Quick start guide for new sessions
+- **AI_SESSION_CONTEXT.md** - This file, essential deployment context
+- **DEPLOYMENT_QUICKSTART.md** - Comprehensive deployment guide
+- **GOOGLE_SSO_TROUBLESHOOTING.md** - Google OAuth error solutions
+- **TROUBLESHOOTING_DEPLOYMENT.md** - General deployment issues
 
 **Last Updated**: November 13, 2024
