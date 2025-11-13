@@ -175,14 +175,19 @@ ssh -i /Users/adityakathera/Downloads/stonkmarketanalyzer-keypair.pem ec2-user@1
 
 ## 🆕 Latest Features Deployed (November 13, 2024)
 
-### ✅ Google SSO - LIVE
+### ✅ Google SSO - LIVE & WORKING (Nov 13, 2024)
 - **Client ID**: `735745800847-od596kg5vp2v7k66ghk7n1n5vndh8e0s.apps.googleusercontent.com`
-- **Status**: Deployed to production
+- **Status**: ✅ Working on https://stonkmarketanalyzer.com
 - **Files**: `frontend/src/components/AuthModal.jsx`, `backend/auth_routes.py`
 - **Package**: `@react-oauth/google` installed
 - **Backend Endpoint**: `/api/auth/google`
-- **Troubleshooting**: See `GOOGLE_SSO_TROUBLESHOOTING.md` for common issues
-- **Common Issue**: "Access blocked" error - Add email to test users in Google Console
+- **Fix Applied**: Removed `useOneTap` prop that was causing authorization errors
+- **Google Console Setup**:
+  - Publishing status: In production
+  - Authorized domains: `stonkmarketanalyzer.com`
+  - JavaScript origins: `https://stonkmarketanalyzer.com`, `https://www.stonkmarketanalyzer.com`
+- **Note**: Add www version to Google Console for full support
+- **Troubleshooting**: See `GOOGLE_SSO_FINAL_FIX.md` for complete guide
 
 ### ✅ Enhanced Portfolio - LIVE & WORKING
 - **Component**: `frontend/src/components/PortfolioEnhanced.jsx`
