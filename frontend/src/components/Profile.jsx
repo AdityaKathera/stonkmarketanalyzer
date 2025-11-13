@@ -497,18 +497,30 @@ function Profile({ user, onUpdateUser }) {
           {!hasGoogleLinked && (
             <div className="link-account-section">
               <h4>Link Google Account</h4>
-              <p>To link your Google account, please follow these steps:</p>
-              <div className="link-instructions">
-                <ol>
-                  <li>Log out of your current session</li>
-                  <li>Click "Sign in with Google" on the login page</li>
-                  <li>Sign in with the same email address: <strong>{displayUser?.email}</strong></li>
-                  <li>Your Google account will be automatically linked!</li>
-                </ol>
-              </div>
-              <div className="link-note">
-                <p>💡 <strong>Note:</strong> Make sure to use the same email address when signing in with Google. Your account data will be preserved.</p>
-              </div>
+              {displayUser?.email?.includes('@gmail.com') ? (
+                <>
+                  <p>To link your Google account, please follow these steps:</p>
+                  <div className="link-instructions">
+                    <ol>
+                      <li>Log out of your current session</li>
+                      <li>Click "Sign in with Google" on the login page</li>
+                      <li>Sign in with your Google account: <strong>{displayUser?.email}</strong></li>
+                      <li>Your Google account will be automatically linked!</li>
+                    </ol>
+                  </div>
+                  <div className="link-note">
+                    <p>💡 <strong>Note:</strong> Your account data will be preserved when linking.</p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p>Your account email (<strong>{displayUser?.email}</strong>) is not a Gmail address.</p>
+                  <div className="link-note">
+                    <p>⚠️ <strong>Google Sign-In Limitation:</strong> Google OAuth only works with Gmail addresses (@gmail.com). Since your account uses a different email provider, you cannot link a Google account.</p>
+                    <p>💡 <strong>Alternative:</strong> You can continue using your email and password to sign in. If you'd like to use Google Sign-In, you would need to create a new account with a Gmail address.</p>
+                  </div>
+                </>
+              )}
             </div>
           )}
 
