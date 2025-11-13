@@ -13,7 +13,8 @@ class ComprehensiveAnalytics:
     """Complete analytics system with all admin features"""
     
     def __init__(self):
-        self.analytics_dir = Path('/opt/stonkmarketanalyzer/analytics')
+        # Use relative path from backend directory
+        self.analytics_dir = Path(__file__).parent / 'analytics_data'
         self.analytics_dir.mkdir(parents=True, exist_ok=True)
         
         # In-memory tracking
@@ -341,13 +342,30 @@ class ComprehensiveAnalytics:
         
         stock_counts = defaultdict(int)
         
+        # Events that involve stock analysis
+        stock_events = [
+            'stock_search', 'stock_analysis', 'research_fundamentals', 
+            'research_news', 'research_technical', 'research_overview',
+            'chat_query', 'stock_comparison'
+        ]
+        
         with open(file_path, 'r') as f:
             for line in f:
                 try:
                     event = json.loads(line)
-                    if event.get('event') == 'stock_analysis' and 'ticker' in event:
-                        ticker = event['ticker']
-                        stock_counts[ticker] += 1
+                    event_type = event.get('event', '')
+                    ticker = event.get('ticker', '')
+                    
+                    # Count any stock-related event with a ticker
+                    if event_type in stock_events and ticker:
+                        # Handle comparison events (ticker format: "AAPL,TSLA")
+                        if ',' in ticker:
+                            for t in ticker.split(','):
+                                t = t.strip()
+                                if t:
+                                    stock_counts[t] += 1
+                        else:
+                            stock_counts[ticker] += 1
                 except:
                     continue
         
@@ -398,6 +416,35 @@ class ComprehensiveAnalytics:
                     continue
         
         return '\n'.join(csv_lines)
+    
+    def get_stats(self, date: str = None) -> Dict:
+        """Alias for get_daily_stats for backward compatibility"""
+        return self.get_daily_stats(date)
+    
+    def get_performance_stats(self) -> Dict:
+        """Alias for get_performance_metrics"""
+        return self.get_performance_metrics()
+    
+    def get_user_retention(self, days: int = 7) -> Dict:
+        """Calculate user retention over specified days"""
+        retention_data = []
+        today = datetime.now().date()
+        
+        for i in range(days):
+            day = (today - timedelta(days=i)).strftime('%Y-%m-%d')
+            stats = self.get_daily_stats(day)
+            retention_data.append({
+                'date': day,
+                'users': stats.get('unique_users', 0),
+                'sessions': stats.get('unique_sessions', 0),
+                'returning_users': 0  # Would need user tracking to calculate properly
+            })
+        
+        return {
+            'days': days,
+            'data': retention_data[::-1],  # Oldest first
+            'total_users': sum(d['users'] for d in retention_data)
+        }
 
 # Global instance
 comprehensive_analytics = ComprehensiveAnalytics()

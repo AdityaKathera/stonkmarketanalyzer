@@ -4,6 +4,9 @@ from dotenv import load_dotenv
 import os
 import hashlib
 
+# Load environment variables FIRST before any other imports
+load_dotenv()
+
 from services.perplexity_service import PerplexityService
 from services.stock_price_service import stock_price_service
 from prompts.templates import prompt_templates, free_chat_template
@@ -15,8 +18,6 @@ from cache_enhanced import EnhancedCache
 from auth_routes import auth_bp
 import time
 from functools import wraps
-
-load_dotenv()
 
 app = Flask(__name__)
 
