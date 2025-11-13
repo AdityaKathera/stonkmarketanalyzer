@@ -97,6 +97,13 @@
   color: #ef5350;
 }
 
+.index-note {
+  font-size: 11px;
+  color: #999;
+  margin-top: 8px;
+  font-style: italic;
+}
+
 .movers-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

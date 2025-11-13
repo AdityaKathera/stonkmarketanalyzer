@@ -77,6 +77,9 @@ export default function MarketOverview() {
                 <div className={`index-change ${isPositive ? 'positive' : 'negative'}`}>
                   {isPositive ? '▲' : '▼'} {Math.abs(index.change).toFixed(2)} ({Math.abs(index.change_percent).toFixed(2)}%)
                 </div>
+                {index.note && (
+                  <div className="index-note">{index.note}</div>
+                )}
               </div>
             );
           })}
