@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import './AuthModal.css';
 
 function AuthModal({ isOpen, onClose, onSuccess }) {
@@ -95,6 +96,51 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
     }
   };
 
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      setLoading(true);
+      setError('');
+
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/auth/google`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            token: credentialResponse.credential
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Google authentication failed');
+      }
+
+      // Store token and user info
+      localStorage.setItem('auth_token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+
+      // Call success callback
+      onSuccess(data.user);
+
+      // Close modal
+      onClose();
+
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleError = () => {
+    setError('Google sign-in failed. Please try again.');
+  };
+
   const switchMode = () => {
     setMode(mode === 'login' ? 'signup' : 'login');
     setError('');
@@ -109,16 +155,34 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
   if (!isOpen) return null;
 
   return (
-    <div className="auth-modal-overlay" onClick={onClose}>
-      <div className="auth-modal" onClick={(e) => e.stopPropagation()}>
-        <button className="auth-modal-close" onClick={onClose}>×</button>
-        
-        <div className="auth-modal-header">
-          <h2>{mode === 'login' ? 'Welcome Back' : 'Create Account'}</h2>
-          <p>{mode === 'login' ? 'Sign in to access your portfolio' : 'Start tracking your investments'}</p>
-        </div>
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+      <div className="auth-modal-overlay" onClick={onClose}>
+        <div className="auth-modal" onClick={(e) => e.stopPropagation()}>
+          <button className="auth-modal-close" onClick={onClose}>×</button>
+          
+          <div className="auth-modal-header">
+            <h2>{mode === 'login' ? 'Welcome Back' : 'Create Account'}</h2>
+            <p>{mode === 'login' ? 'Sign in to access your portfolio' : 'Start tracking your investments'}</p>
+          </div>
 
-        <form onSubmit={handleSubmit} className="auth-form">
+          {/* Google Sign-In Button */}
+          <div className="google-signin-container">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              useOneTap
+              theme="outline"
+              size="large"
+              text={mode === 'login' ? 'signin_with' : 'signup_with'}
+              width="100%"
+            />
+          </div>
+
+          <div className="auth-divider">
+            <span>or</span>
+          </div>
+
+          <form onSubmit={handleSubmit} className="auth-form">
           {mode === 'signup' && (
             <div className="form-group">
               <label htmlFor="name">Name</label>
@@ -211,7 +275,8 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
           )}
         </div>
       </div>
-    </div>
+      </div>
+    </GoogleOAuthProvider>
   );
 }
 
