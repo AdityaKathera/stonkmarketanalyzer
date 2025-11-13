@@ -321,6 +321,17 @@ def get_portfolio_allocation():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@auth_bp.route('/api/portfolio/insights', methods=['GET'])
+@require_auth
+def get_portfolio_insights():
+    """Get AI-powered portfolio insights and recommendations"""
+    try:
+        from portfolio_insights_service import portfolio_insights_service
+        insights = portfolio_insights_service.get_portfolio_insights(request.user_id)
+        return jsonify(insights), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 # Watchlist Routes
 
 @auth_bp.route('/api/watchlist', methods=['GET'])

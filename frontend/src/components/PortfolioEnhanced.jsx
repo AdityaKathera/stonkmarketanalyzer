@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import PortfolioInsights from './PortfolioInsights';
 import './Portfolio.css';
 
 function PortfolioEnhanced({ user }) {
@@ -156,6 +157,11 @@ function PortfolioEnhanced({ user }) {
           </button>
         </div>
       </div>
+
+      {/* AI-Powered Portfolio Insights */}
+      {holdings.length > 0 && (
+        <PortfolioInsights userId={user?.id} />
+      )}
 
       {/* Portfolio Summary Cards */}
       {holdings.length > 0 && summary.total_value !== null && (
