@@ -117,19 +117,21 @@
   border-bottom: 3px solid transparent;
   cursor: pointer;
   font-size: 16px;
-  color: #64748b;
+  color: #ffffff;
   transition: all 0.2s;
   margin-bottom: -2px;
+  font-weight: 500;
 }
 
 .profile-tabs button:hover {
-  color: #667eea;
+  color: #e0e7ff;
+  border-bottom-color: rgba(255, 255, 255, 0.3);
 }
 
 .profile-tabs button.active {
-  color: #667eea;
-  border-bottom-color: #667eea;
-  font-weight: 600;
+  color: #ffffff;
+  border-bottom-color: #ffffff;
+  font-weight: 700;
 }
 
 .profile-section {
@@ -334,16 +336,17 @@
 }
 
 .dark-mode .profile-tabs button {
-  color: #94a3b8;
+  color: #ffffff;
 }
 
 .dark-mode .profile-tabs button:hover {
-  color: #818cf8;
+  color: #e0e7ff;
+  border-bottom-color: rgba(255, 255, 255, 0.3);
 }
 
 .dark-mode .profile-tabs button.active {
-  color: #818cf8;
-  border-bottom-color: #818cf8;
+  color: #ffffff;
+  border-bottom-color: #ffffff;
 }
 
 .dark-mode .profile-tabs {
