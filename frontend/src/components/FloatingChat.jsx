@@ -78,6 +78,9 @@ const FloatingChat = ({ currentMode, ticker, user }) => {
     try {
       // Call AI chat API
       const token = localStorage.getItem('auth_token');
+      
+      console.log('[FloatingChat] Sending message to API:', userInput);
+      
       const response = await fetch('https://api.stonkmarketanalyzer.com/api/chat', {
         method: 'POST',
         headers: {
@@ -93,11 +96,16 @@ const FloatingChat = ({ currentMode, ticker, user }) => {
         })
       });
 
+      console.log('[FloatingChat] API response status:', response.status);
+
       if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('[FloatingChat] API error:', errorData);
         throw new Error('Failed to get AI response');
       }
 
       const data = await response.json();
+      console.log('[FloatingChat] Received AI response:', data);
       
       const botMessage = {
         type: 'bot',
