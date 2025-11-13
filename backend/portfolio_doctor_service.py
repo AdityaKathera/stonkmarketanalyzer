@@ -32,10 +32,19 @@ class PortfolioDoctorService:
             
             if not holdings:
                 return {
-                    'action_items': [],
+                    'action_items': [{
+                        'type': 'start',
+                        'priority': 'high',
+                        'ticker': '',
+                        'title': 'Start building your portfolio',
+                        'description': 'Add your first stock to get personalized recommendations',
+                        'action': 'Go to Portfolio and add your holdings',
+                        'reasoning': 'Portfolio Doctor needs your holdings to provide personalized advice'
+                    }],
                     'risk_alerts': [],
                     'opportunities': [],
-                    'health_score': 0
+                    'health_score': 50,
+                    'generated_at': datetime.now().isoformat()
                 }
             
             # Generate AI recommendations
@@ -197,6 +206,9 @@ class PortfolioDoctorService:
     
     def _calculate_health_score(self, holdings: List[Dict], summary: Dict) -> int:
         """Calculate portfolio health score 0-100"""
+        if not holdings:
+            return 50  # Neutral score for empty portfolio
+        
         score = 100
         
         # Diversification (max -30 points)
@@ -213,27 +225,34 @@ class PortfolioDoctorService:
             score -= 20
         elif total_return < -10:
             score -= 10
+        elif total_return > 20:
+            score += 5  # Bonus for good performance
         
         # Concentration risk (max -20 points)
         total_value = summary.get('total_value', 0)
-        if total_value > 0:
-            max_position_pct = max((h.get('current_value', 0) / total_value) * 100 for h in holdings)
-            if max_position_pct > 40:
-                score -= 20
-            elif max_position_pct > 30:
-                score -= 10
+        if total_value > 0 and len(holdings) > 0:
+            try:
+                max_position_pct = max((h.get('current_value', 0) / total_value) * 100 for h in holdings if h.get('current_value', 0) > 0)
+                if max_position_pct > 40:
+                    score -= 20
+                elif max_position_pct > 30:
+                    score -= 10
+            except (ValueError, ZeroDivisionError):
+                pass
         
         # Unrealized losses (max -15 points)
-        total_loss_pct = sum(1 for h in holdings if h.get('return_percentage', 0) < -15)
-        if total_loss_pct > len(holdings) / 2:
-            score -= 15
-        elif total_loss_pct > len(holdings) / 3:
-            score -= 10
+        if len(holdings) > 0:
+            total_loss_pct = sum(1 for h in holdings if h.get('return_percentage', 0) < -15)
+            if total_loss_pct > len(holdings) / 2:
+                score -= 15
+            elif total_loss_pct > len(holdings) / 3:
+                score -= 10
         
         # Volatility (max -15 points)
-        high_volatility = sum(1 for h in holdings if abs(h.get('return_percentage', 0)) > 30)
-        if high_volatility > len(holdings) / 2:
-            score -= 15
+        if len(holdings) > 0:
+            high_volatility = sum(1 for h in holdings if abs(h.get('return_percentage', 0)) > 30)
+            if high_volatility > len(holdings) / 2:
+                score -= 15
         
         return max(0, min(100, score))
     
