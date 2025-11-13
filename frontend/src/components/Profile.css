@@ -545,37 +545,13 @@
   font-size: 14px;
 }
 
-.link-google-btn {
-  padding: 12px 24px;
-  background: white;
-  color: #1e293b;
-  border: 2px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  display: inline-flex;
+.google-login-wrapper {
+  display: flex;
+  justify-content: center;
   align-items: center;
-  gap: 10px;
 }
 
-.link-google-btn:hover:not(:disabled) {
-  border-color: #667eea;
-  color: #667eea;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
-}
 
-.link-google-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.google-icon {
-  font-size: 20px;
-}
 
 .linked-accounts-info {
   padding: 20px;
@@ -638,16 +614,7 @@
   color: #cbd5e1;
 }
 
-.dark-mode .link-google-btn {
-  background: #1e293b;
-  color: #f1f5f9;
-  border-color: #475569;
-}
 
-.dark-mode .link-google-btn:hover:not(:disabled) {
-  border-color: #818cf8;
-  color: #818cf8;
-}
 
 .dark-mode .linked-accounts-info {
   background: #422006;

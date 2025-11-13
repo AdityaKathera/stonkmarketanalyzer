@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { GoogleOAuthProvider, useGoogleLogin } from '@react-oauth/google';
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import './Profile.css';
 
 function Profile({ user, onUpdateUser }) {
@@ -187,57 +187,52 @@ function Profile({ user, onUpdateUser }) {
     }
   };
 
-  const handleLinkGoogle = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
-      try {
-        setLoading(true);
-        setMessage({ type: '', text: '' });
-        
-        const token = localStorage.getItem('auth_token');
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/auth/link-google`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ token: tokenResponse.access_token })
-          }
-        );
-        
-        const data = await response.json();
-        
-        if (!response.ok) {
-          throw new Error(data.error || 'Failed to link Google account');
+  const handleLinkGoogle = async (credentialResponse) => {
+    try {
+      setLoading(true);
+      setMessage({ type: '', text: '' });
+      
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/auth/link-google`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ token: credentialResponse.credential })
         }
-        
-        setMessage({ type: 'success', text: 'Google account linked successfully!' });
-        
-        // Refresh linked accounts
-        const accountsResponse = await fetch(
-          `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/auth/linked-accounts`,
-          {
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
-          }
-        );
-        
-        if (accountsResponse.ok) {
-          const accountsData = await accountsResponse.json();
-          setLinkedAccounts(accountsData.linked_accounts || []);
-        }
-      } catch (err) {
-        setMessage({ type: 'error', text: err.message });
-      } finally {
-        setLoading(false);
+      );
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to link Google account');
       }
-    },
-    onError: () => {
-      setMessage({ type: 'error', text: 'Failed to authenticate with Google' });
+      
+      setMessage({ type: 'success', text: 'Google account linked successfully!' });
+      
+      // Refresh linked accounts
+      const accountsResponse = await fetch(
+        `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/auth/linked-accounts`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+      
+      if (accountsResponse.ok) {
+        const accountsData = await accountsResponse.json();
+        setLinkedAccounts(accountsData.linked_accounts || []);
+      }
+    } catch (err) {
+      setMessage({ type: 'error', text: err.message });
+    } finally {
+      setLoading(false);
     }
-  });
+  };
 
   const handleUnlinkGoogle = async () => {
     if (!confirm('Are you sure you want to unlink your Google account?')) {
@@ -551,14 +546,18 @@ function Profile({ user, onUpdateUser }) {
             <div className="link-account-section">
               <h4>Link Additional Account</h4>
               <p>Connect your Google account for easier sign-in</p>
-              <button
-                className="link-google-btn"
-                onClick={() => handleLinkGoogle()}
-                disabled={loading}
-              >
-                <span className="google-icon">🔵</span>
-                Link Google Account
-              </button>
+              <div className="google-login-wrapper">
+                <GoogleLogin
+                  onSuccess={handleLinkGoogle}
+                  onError={() => {
+                    setMessage({ type: 'error', text: 'Failed to authenticate with Google' });
+                  }}
+                  text="continue_with"
+                  shape="rectangular"
+                  size="large"
+                  width="280"
+                />
+              </div>
             </div>
           )}
 
