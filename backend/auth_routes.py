@@ -692,51 +692,51 @@ def get_stock_news(ticker):
 @require_auth
 def get_watchlist_news():
     """
-    Get AI-summarized news for all stocks in user's watchlist
+    Get AI-summarized news for all stocks in user's portfolio
     Query params: limit_per_stock (default: 3)
     """
     try:
         user_id = request.user_id
         limit_per_stock = int(request.args.get('limit_per_stock', 3))
         
-        # Get user's watchlist
+        # Get user's portfolio stocks (unique tickers)
         conn = sqlite3.connect(DB_PATH)
         cursor = conn.cursor()
         
         cursor.execute('''
-            SELECT ticker FROM watchlist 
+            SELECT DISTINCT ticker FROM portfolio 
             WHERE user_id = ? 
-            ORDER BY added_at DESC
+            ORDER BY ticker ASC
         ''', (user_id,))
         
-        watchlist_tickers = [row[0] for row in cursor.fetchall()]
+        portfolio_tickers = [row[0] for row in cursor.fetchall()]
         conn.close()
         
-        if not watchlist_tickers:
+        if not portfolio_tickers:
             return jsonify({
                 'news': {},
-                'message': 'No stocks in watchlist'
+                'message': 'No stocks in portfolio'
             }), 200
         
-        # Get news for all watchlist stocks
+        # Get news for all portfolio stocks
         news_service = get_news_service()
         summarizer = get_summarizer_service()
         
         all_news = {}
-        for ticker in watchlist_tickers[:10]:  # Limit to 10 stocks to avoid rate limits
+        for ticker in portfolio_tickers[:10]:  # Limit to 10 stocks to avoid rate limits
             news_items = news_service.get_news_for_stock(ticker, limit_per_stock)
             summarized = summarizer.summarize_multiple(news_items, ticker)
             all_news[ticker] = summarized
         
         return jsonify({
             'news': all_news,
-            'tickers': watchlist_tickers[:10],
+            'tickers': portfolio_tickers[:10],
             'count': len(all_news)
         }), 200
         
     except Exception as e:
-        print(f"[API] Error fetching watchlist news: {e}")
-        return jsonify({'error': 'Failed to fetch watchlist news'}), 500
+        print(f"[API] Error fetching portfolio news: {e}")
+        return jsonify({'error': 'Failed to fetch portfolio news'}), 500
 
 
 @auth_bp.route('/api/news/refresh', methods=['POST'])

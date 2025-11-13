@@ -156,7 +156,10 @@ const NewsSection = () => {
           <h2>📰 AI News Summarizer</h2>
         </div>
         <div className="news-empty">
-          <p>📋 Add stocks to your watchlist to see personalized news!</p>
+          <p>💼 Add stocks to your portfolio to see personalized news!</p>
+          <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginTop: '10px' }}>
+            Go to the Portfolio tab and add your holdings to get started.
+          </p>
         </div>
       </div>
     );
