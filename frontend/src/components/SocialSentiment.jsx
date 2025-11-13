@@ -16,18 +16,31 @@ const SocialSentiment = () => {
       setLoading(true);
       setError(null);
 
+      console.log('[SocialSentiment] Fetching portfolio sentiment...');
+      
       const token = localStorage.getItem('auth_token');
+      
+      if (!token) {
+        console.error('[SocialSentiment] No auth token found');
+        throw new Error('Not authenticated');
+      }
+      
+      console.log('[SocialSentiment] Making API call to /api/sentiment/portfolio');
+      
       const response = await fetch('https://api.stonkmarketanalyzer.com/api/sentiment/portfolio', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
+      
+      console.log('[SocialSentiment] API response status:', response.status);
 
       if (!response.ok) {
         throw new Error('Failed to fetch sentiment');
       }
 
       const data = await response.json();
+      console.log('[SocialSentiment] Received data:', data);
       setSentiment(data.sentiment || {});
     } catch (err) {
       console.error('Error fetching sentiment:', err);

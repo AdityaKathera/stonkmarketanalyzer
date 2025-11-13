@@ -7,12 +7,13 @@ import Portfolio from './components/PortfolioEnhanced'
 import Profile from './components/Profile'
 import NewsSection from './components/NewsSection'
 import SocialSentiment from './components/SocialSentiment'
+import FloatingChat from './components/FloatingChat'
 import AuthModal from './components/AuthModal'
 import analytics from './analytics'
 import './App.css'
 
 function App() {
-  const [mode, setMode] = useState('guided') // 'guided', 'chat', 'compare', 'watchlist', 'portfolio', 'profile', 'news', 'sentiment'
+  const [mode, setMode] = useState('guided') // 'guided', 'compare', 'watchlist', 'portfolio', 'profile', 'news', 'sentiment'
   const [ticker, setTicker] = useState('')
   const [horizon, setHorizon] = useState('1-3 years')
   const [riskLevel, setRiskLevel] = useState('moderate')
@@ -198,12 +199,6 @@ function App() {
             📊 Guided
           </button>
           <button
-            className={mode === 'chat' ? 'active' : ''}
-            onClick={() => handleModeChange('chat')}
-          >
-            💬 Chat
-          </button>
-          <button
             className={mode === 'compare' ? 'active' : ''}
             onClick={() => handleModeChange('compare')}
           >
@@ -250,9 +245,6 @@ function App() {
         {mode === 'guided' && (
           <ResearchFlow ticker={ticker} horizon={horizon} riskLevel={riskLevel} />
         )}
-        {mode === 'chat' && (
-          <ChatInterface ticker={ticker} horizon={horizon} riskLevel={riskLevel} />
-        )}
         {mode === 'compare' && (
           <StockComparison />
         )}
@@ -277,6 +269,13 @@ function App() {
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
         onSuccess={handleAuthSuccess}
+      />
+
+      {/* Floating AI Chat Assistant */}
+      <FloatingChat 
+        currentMode={mode}
+        ticker={ticker}
+        user={user}
       />
     </div>
   )

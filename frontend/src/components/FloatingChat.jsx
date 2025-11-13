@@ -1,0 +1,211 @@
+import React, { useState, useEffect, useRef } from 'react';
+import './FloatingChat.css';
+
+const FloatingChat = ({ currentMode, ticker, user }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
+  const messagesEndRef = useRef(null);
+
+  // Initialize with welcome message
+  useEffect(() => {
+    if (messages.length === 0) {
+      setMessages([{
+        type: 'bot',
+        text: "👋 Hi! I'm your AI stock assistant. Ask me anything about stocks, your portfolio, or market trends!",
+        timestamp: new Date()
+      }]);
+    }
+  }, []);
+
+  // Scroll to bottom when new messages arrive
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  // Context-aware suggestions based on current page
+  const getContextSuggestions = () => {
+    switch (currentMode) {
+      case 'portfolio':
+        return [
+          '📊 Analyze my portfolio',
+          '💡 Give me investment tips',
+          '📈 Which stocks should I buy?'
+        ];
+      case 'news':
+        return [
+          '📰 Summarize latest news',
+          '🔍 What\'s trending today?',
+          '💬 Explain this news impact'
+        ];
+      case 'sentiment':
+        return [
+          '🎭 Explain sentiment scores',
+          '📊 What\'s the market mood?',
+          '🔥 Which stocks are hot?'
+        ];
+      default:
+        if (ticker) {
+          return [
+            `📊 Analyze ${ticker}`,
+            `💰 Is ${ticker} a good buy?`,
+            `📈 ${ticker} price prediction`
+          ];
+        }
+        return [
+          '🔍 Research a stock',
+          '💼 Portfolio advice',
+          '📊 Market analysis'
+        ];
+    }
+  };
+
+  const handleSend = async () => {
+    if (!input.trim()) return;
+
+    const userMessage = {
+      type: 'user',
+      text: input,
+      timestamp: new Date()
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    setInput('');
+    setIsTyping(true);
+
+    // Simulate AI response (replace with actual API call)
+    setTimeout(() => {
+      const botMessage = {
+        type: 'bot',
+        text: generateResponse(input),
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, botMessage]);
+      setIsTyping(false);
+    }, 1500);
+  };
+
+  const generateResponse = (question) => {
+    // Simple response logic (replace with actual Perplexity API call)
+    const q = question.toLowerCase();
+    
+    if (q.includes('portfolio') || q.includes('analyze')) {
+      return "I can help analyze your portfolio! Based on your holdings, I'd recommend diversifying across different sectors. Would you like specific stock recommendations?";
+    } else if (q.includes('buy') || q.includes('invest')) {
+      return "Before investing, consider: 1) Your risk tolerance, 2) Investment timeline, 3) Diversification. Which stock are you interested in?";
+    } else if (q.includes('news') || q.includes('trending')) {
+      return "The market is showing mixed signals today. Tech stocks are up, while energy is down. Check the News tab for detailed analysis!";
+    } else if (q.includes('sentiment')) {
+      return "Sentiment scores range from 0-100. Above 70 is bullish, below 30 is bearish. The score reflects social media and community mood about a stock.";
+    } else {
+      return "I'm here to help with stock research, portfolio analysis, and market insights. Try asking about a specific stock or your portfolio!";
+    }
+  };
+
+  const handleSuggestionClick = (suggestion) => {
+    setInput(suggestion);
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  return (
+    <>
+      {/* Floating Button */}
+      <button
+        className={`floating-chat-button ${isOpen ? 'open' : ''}`}
+        onClick={() => setIsOpen(!isOpen)}
+        aria-label="AI Chat Assistant"
+      >
+        {isOpen ? '✕' : '💬'}
+        {!isOpen && <span className="pulse-dot"></span>}
+      </button>
+
+      {/* Chat Panel */}
+      {isOpen && (
+        <div className="floating-chat-panel">
+          {/* Header */}
+          <div className="chat-header">
+            <div className="chat-header-content">
+              <span className="chat-icon">🤖</span>
+              <div>
+                <h3>Stonk AI Assistant</h3>
+                <p>Powered by AI</p>
+              </div>
+            </div>
+            <button className="chat-close" onClick={() => setIsOpen(false)}>
+              ✕
+            </button>
+          </div>
+
+          {/* Messages */}
+          <div className="chat-messages">
+            {messages.map((msg, index) => (
+              <div key={index} className={`message ${msg.type}`}>
+                <div className="message-bubble">
+                  {msg.text}
+                </div>
+                <div className="message-time">
+                  {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </div>
+              </div>
+            ))}
+            
+            {isTyping && (
+              <div className="message bot">
+                <div className="message-bubble typing">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+              </div>
+            )}
+            
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Quick Suggestions */}
+          {messages.length <= 2 && (
+            <div className="chat-suggestions">
+              {getContextSuggestions().map((suggestion, index) => (
+                <button
+                  key={index}
+                  className="suggestion-chip"
+                  onClick={() => handleSuggestionClick(suggestion)}
+                >
+                  {suggestion}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Input */}
+          <div className="chat-input-container">
+            <textarea
+              className="chat-input"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Ask me anything about stocks..."
+              rows="1"
+            />
+            <button
+              className="chat-send"
+              onClick={handleSend}
+              disabled={!input.trim()}
+            >
+              ➤
+            </button>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
+export default FloatingChat;
