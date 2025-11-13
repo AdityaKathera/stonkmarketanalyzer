@@ -69,6 +69,7 @@ def login():
     
     email = data.get('email', '').strip().lower()
     password = data.get('password', '')
+    remember_me = data.get('remember_me', False)
     
     if not email or not password:
         return jsonify({'error': 'Email and password are required'}), 400
@@ -87,8 +88,8 @@ def login():
     # Update last login
     update_last_login(user_id)
     
-    # Generate token
-    token = generate_token(user_id, email)
+    # Generate token with remember_me option
+    token = generate_token(user_id, email, remember_me)
     
     return jsonify({
         'success': True,
@@ -115,6 +116,65 @@ def get_current_user():
         'name': user[3],
         'created_at': user[4],
         'last_login': user[5]
+    }), 200
+
+@auth_bp.route('/api/auth/profile', methods=['PUT'])
+@require_auth
+def update_profile():
+    """Update user profile (name)"""
+    from auth_service import update_user_name
+    
+    data = request.json
+    name = data.get('name', '').strip()
+    
+    if not name:
+        return jsonify({'error': 'Name is required'}), 400
+    
+    success = update_user_name(request.user_id, name)
+    
+    if not success:
+        return jsonify({'error': 'Failed to update profile'}), 500
+    
+    return jsonify({
+        'success': True,
+        'message': 'Profile updated successfully',
+        'name': name
+    }), 200
+
+@auth_bp.route('/api/auth/change-password', methods=['POST'])
+@require_auth
+def change_password():
+    """Change user password"""
+    from auth_service import update_user_password
+    
+    data = request.json
+    current_password = data.get('current_password', '')
+    new_password = data.get('new_password', '')
+    
+    if not current_password or not new_password:
+        return jsonify({'error': 'Current and new password are required'}), 400
+    
+    if len(new_password) < 8:
+        return jsonify({'error': 'New password must be at least 8 characters'}), 400
+    
+    # Verify current password
+    user = get_user_by_id(request.user_id)
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+    
+    password_hash = user[2]
+    if not verify_password(current_password, password_hash):
+        return jsonify({'error': 'Current password is incorrect'}), 401
+    
+    # Update password
+    success = update_user_password(request.user_id, new_password)
+    
+    if not success:
+        return jsonify({'error': 'Failed to update password'}), 500
+    
+    return jsonify({
+        'success': True,
+        'message': 'Password changed successfully'
     }), 200
 
 # Portfolio Management Routes

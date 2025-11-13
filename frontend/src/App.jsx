@@ -4,12 +4,13 @@ import ResearchFlow from './components/ResearchFlow'
 import StockComparison from './components/StockComparison'
 import Watchlist from './components/Watchlist'
 import Portfolio from './components/PortfolioEnhanced'
+import Profile from './components/Profile'
 import AuthModal from './components/AuthModal'
 import analytics from './analytics'
 import './App.css'
 
 function App() {
-  const [mode, setMode] = useState('guided') // 'guided', 'chat', 'compare', 'watchlist', 'portfolio'
+  const [mode, setMode] = useState('guided') // 'guided', 'chat', 'compare', 'watchlist', 'portfolio', 'profile'
   const [ticker, setTicker] = useState('')
   const [horizon, setHorizon] = useState('1-3 years')
   const [riskLevel, setRiskLevel] = useState('moderate')
@@ -83,6 +84,11 @@ function App() {
     setShowAuthModal(false);
   };
 
+  // Handle user update (from profile)
+  const handleUpdateUser = (updatedUser) => {
+    setUser(updatedUser);
+  };
+
   // Handle logout
   const handleLogout = () => {
     localStorage.removeItem('auth_token');
@@ -128,7 +134,9 @@ function App() {
           <div className="header-actions">
             {user ? (
               <div className="user-menu">
-                <span className="user-name">👤 {user.name || user.email}</span>
+                <button className="profile-btn" onClick={() => handleModeChange('profile')}>
+                  👤 {user.name || user.email}
+                </button>
                 <button className="logout-btn" onClick={handleLogout}>
                   Logout
                 </button>
@@ -206,12 +214,20 @@ function App() {
             ⭐ Watchlist
           </button>
           {user && (
-            <button
-              className={mode === 'portfolio' ? 'active' : ''}
-              onClick={() => handleModeChange('portfolio')}
-            >
-              💼 Portfolio
-            </button>
+            <>
+              <button
+                className={mode === 'portfolio' ? 'active' : ''}
+                onClick={() => handleModeChange('portfolio')}
+              >
+                💼 Portfolio
+              </button>
+              <button
+                className={mode === 'profile' ? 'active' : ''}
+                onClick={() => handleModeChange('profile')}
+              >
+                ⚙️ Profile
+              </button>
+            </>
           )}
         </div>
       </div>
@@ -231,6 +247,9 @@ function App() {
         )}
         {mode === 'portfolio' && user && (
           <Portfolio user={user} />
+        )}
+        {mode === 'profile' && user && (
+          <Profile user={user} onUpdateUser={handleUpdateUser} />
         )}
       </main>
 

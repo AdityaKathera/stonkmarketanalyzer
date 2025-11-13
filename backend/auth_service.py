@@ -15,7 +15,8 @@ import secrets
 # JWT Configuration
 JWT_SECRET = os.getenv('JWT_SECRET', secrets.token_hex(32))
 JWT_ALGORITHM = 'HS256'
-JWT_EXPIRATION_HOURS = 24 * 7  # 7 days
+JWT_EXPIRATION_HOURS = 24 * 7  # 7 days (default)
+JWT_EXPIRATION_HOURS_EXTENDED = 24 * 30  # 30 days (remember me)
 
 # Database setup
 DB_PATH = 'users.db'
@@ -82,12 +83,13 @@ def verify_password(password, password_hash):
     """Verify a password against its hash"""
     return bcrypt.checkpw(password.encode('utf-8'), password_hash.encode('utf-8'))
 
-def generate_token(user_id, email):
+def generate_token(user_id, email, remember_me=False):
     """Generate a JWT token for a user"""
+    expiration_hours = JWT_EXPIRATION_HOURS_EXTENDED if remember_me else JWT_EXPIRATION_HOURS
     payload = {
         'user_id': user_id,
         'email': email,
-        'exp': datetime.utcnow() + timedelta(hours=JWT_EXPIRATION_HOURS),
+        'exp': datetime.utcnow() + timedelta(hours=expiration_hours),
         'iat': datetime.utcnow()
     }
     return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
@@ -169,3 +171,28 @@ def require_auth(f):
         return f(*args, **kwargs)
     
     return decorated_function
+
+def update_user_name(user_id, name):
+    """Update user's name"""
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        c.execute('UPDATE users SET name = ? WHERE id = ?', (name, user_id))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception:
+        return False
+
+def update_user_password(user_id, new_password):
+    """Update user's password"""
+    try:
+        password_hash = hash_password(new_password)
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        c.execute('UPDATE users SET password_hash = ? WHERE id = ?', (password_hash, user_id))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception:
+        return False

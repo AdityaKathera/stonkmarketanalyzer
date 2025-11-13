@@ -10,6 +10,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
     name: '',
     confirmPassword: ''
   });
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -62,7 +63,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
     try {
       const endpoint = mode === 'login' ? '/api/auth/login' : '/api/auth/signup';
       const payload = mode === 'login' 
-        ? { email: formData.email, password: formData.password }
+        ? { email: formData.email, password: formData.password, remember_me: rememberMe }
         : { email: formData.email, password: formData.password, name: formData.name };
 
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}${endpoint}`, {
@@ -144,6 +145,7 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
   const switchMode = () => {
     setMode(mode === 'login' ? 'signup' : 'login');
     setError('');
+    setRememberMe(false);
     setFormData({
       email: '',
       password: '',
@@ -236,6 +238,20 @@ function AuthModal({ isOpen, onClose, onSuccess }) {
                 placeholder="••••••••"
                 disabled={loading}
               />
+            </div>
+          )}
+
+          {mode === 'login' && (
+            <div className="form-group remember-me">
+              <label className="checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  disabled={loading}
+                />
+                <span>Remember me for 30 days</span>
+              </label>
             </div>
           )}
 
