@@ -846,3 +846,87 @@ def refresh_sentiment_cache():
     except Exception as e:
         print(f"[API] Error clearing cache: {e}")
         return jsonify({'error': 'Failed to clear cache'}), 500
+
+
+# ============================================================================
+# AI CHAT ENDPOINT
+# ============================================================================
+
+@auth_bp.route('/api/chat', methods=['POST'])
+@require_auth
+def ai_chat():
+    """
+    AI chat assistant endpoint
+    Provides intelligent responses using Perplexity API
+    """
+    try:
+        data = request.json
+        user_message = data.get('message', '').strip()
+        context = data.get('context', {})  # Current page, ticker, etc.
+        
+        if not user_message:
+            return jsonify({'error': 'Message is required'}), 400
+        
+        # Build context-aware prompt
+        ticker = context.get('ticker', '')
+        mode = context.get('mode', '')
+        
+        system_prompt = "You are a helpful AI stock market assistant. Provide concise, accurate financial advice and stock analysis."
+        
+        # Add context to the prompt
+        if ticker:
+            user_message = f"Regarding {ticker}: {user_message}"
+        
+        if mode == 'portfolio':
+            system_prompt += " The user is viewing their portfolio."
+        elif mode == 'news':
+            system_prompt += " The user is viewing stock news."
+        elif mode == 'sentiment':
+            system_prompt += " The user is viewing social sentiment data."
+        
+        # Call Perplexity API
+        import os
+        import requests
+        
+        api_key = os.getenv('PERPLEXITY_API_KEY')
+        
+        if not api_key:
+            return jsonify({'error': 'AI service not configured'}), 500
+        
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json"
+        }
+        
+        payload = {
+            "model": "sonar",
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_message}
+            ],
+            "temperature": 0.7,
+            "max_tokens": 300
+        }
+        
+        response = requests.post(
+            "https://api.perplexity.ai/chat/completions",
+            json=payload,
+            headers=headers,
+            timeout=15
+        )
+        
+        if response.status_code != 200:
+            print(f"[Chat] Perplexity API error: {response.status_code}")
+            return jsonify({'error': 'AI service temporarily unavailable'}), 500
+        
+        result = response.json()
+        ai_response = result['choices'][0]['message']['content']
+        
+        return jsonify({
+            'response': ai_response,
+            'timestamp': datetime.now().isoformat()
+        }), 200
+        
+    except Exception as e:
+        print(f"[Chat] Error: {e}")
+        return jsonify({'error': 'Failed to process chat message'}), 500

@@ -71,35 +71,54 @@ const FloatingChat = ({ currentMode, ticker, user }) => {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const userInput = input;
     setInput('');
     setIsTyping(true);
 
-    // Simulate AI response (replace with actual API call)
-    setTimeout(() => {
+    try {
+      // Call AI chat API
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch('https://api.stonkmarketanalyzer.com/api/chat', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          message: userInput,
+          context: {
+            mode: currentMode,
+            ticker: ticker
+          }
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to get AI response');
+      }
+
+      const data = await response.json();
+      
       const botMessage = {
         type: 'bot',
-        text: generateResponse(input),
+        text: data.response,
         timestamp: new Date()
       };
+      
       setMessages(prev => [...prev, botMessage]);
+    } catch (error) {
+      console.error('Chat error:', error);
+      
+      // Fallback response
+      const botMessage = {
+        type: 'bot',
+        text: "I'm having trouble connecting right now. Please try again in a moment!",
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, botMessage]);
+    } finally {
       setIsTyping(false);
-    }, 1500);
-  };
-
-  const generateResponse = (question) => {
-    // Simple response logic (replace with actual Perplexity API call)
-    const q = question.toLowerCase();
-    
-    if (q.includes('portfolio') || q.includes('analyze')) {
-      return "I can help analyze your portfolio! Based on your holdings, I'd recommend diversifying across different sectors. Would you like specific stock recommendations?";
-    } else if (q.includes('buy') || q.includes('invest')) {
-      return "Before investing, consider: 1) Your risk tolerance, 2) Investment timeline, 3) Diversification. Which stock are you interested in?";
-    } else if (q.includes('news') || q.includes('trending')) {
-      return "The market is showing mixed signals today. Tech stocks are up, while energy is down. Check the News tab for detailed analysis!";
-    } else if (q.includes('sentiment')) {
-      return "Sentiment scores range from 0-100. Above 70 is bullish, below 30 is bearish. The score reflects social media and community mood about a stock.";
-    } else {
-      return "I'm here to help with stock research, portfolio analysis, and market insights. Try asking about a specific stock or your portfolio!";
     }
   };
 
