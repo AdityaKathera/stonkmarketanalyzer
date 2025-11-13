@@ -497,30 +497,20 @@ function Profile({ user, onUpdateUser }) {
           {!hasGoogleLinked && (
             <div className="link-account-section">
               <h4>Link Google Account</h4>
-              {displayUser?.email?.includes('@gmail.com') ? (
-                <>
-                  <p>To link your Google account, please follow these steps:</p>
-                  <div className="link-instructions">
-                    <ol>
-                      <li>Log out of your current session</li>
-                      <li>Click "Sign in with Google" on the login page</li>
-                      <li>Sign in with your Google account: <strong>{displayUser?.email}</strong></li>
-                      <li>Your Google account will be automatically linked!</li>
-                    </ol>
-                  </div>
-                  <div className="link-note">
-                    <p>💡 <strong>Note:</strong> Your account data will be preserved when linking.</p>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <p>Your account email (<strong>{displayUser?.email}</strong>) is not a Gmail address.</p>
-                  <div className="link-note">
-                    <p>⚠️ <strong>Google Sign-In Limitation:</strong> Google OAuth only works with Gmail addresses (@gmail.com). Since your account uses a different email provider, you cannot link a Google account.</p>
-                    <p>💡 <strong>Alternative:</strong> You can continue using your email and password to sign in. If you'd like to use Google Sign-In, you would need to create a new account with a Gmail address.</p>
-                  </div>
-                </>
-              )}
+              <p>To link your Google account to this email (<strong>{displayUser?.email}</strong>):</p>
+              <div className="link-instructions">
+                <ol>
+                  <li>Make sure you have a Google account with the email: <strong>{displayUser?.email}</strong></li>
+                  <li>Log out of your current session</li>
+                  <li>Click "Sign in with Google" on the login page</li>
+                  <li>Sign in with Google using: <strong>{displayUser?.email}</strong></li>
+                  <li>Your Google account will be automatically linked!</li>
+                </ol>
+              </div>
+              <div className="link-note">
+                <p>💡 <strong>Important:</strong> You need a Google account associated with <strong>{displayUser?.email}</strong>. If you don't have one, you can create a Google account with any email address at <a href="https://accounts.google.com/signup" target="_blank" rel="noopener noreferrer">accounts.google.com/signup</a></p>
+                <p>✅ Your account data (portfolio, watchlist, etc.) will be preserved when linking.</p>
+              </div>
             </div>
           )}
 

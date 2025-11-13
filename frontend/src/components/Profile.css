@@ -586,6 +586,16 @@
   font-weight: 600;
 }
 
+.link-note a {
+  color: #667eea;
+  text-decoration: underline;
+  font-weight: 600;
+}
+
+.link-note a:hover {
+  color: #5568d3;
+}
+
 
 
 .linked-accounts-info {
@@ -679,6 +689,14 @@
 
 .dark-mode .link-note p {
   color: #fef3c7;
+}
+
+.dark-mode .link-note a {
+  color: #818cf8;
+}
+
+.dark-mode .link-note a:hover {
+  color: #a5b4fc;
 }
 
 /* Responsive for linked accounts */
