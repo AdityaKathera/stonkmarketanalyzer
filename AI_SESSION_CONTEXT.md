@@ -270,3 +270,28 @@ aws cloudfront create-invalidation --distribution-id E2UZFZ0XAK8XWJ --paths "/*"
 - **TROUBLESHOOTING_DEPLOYMENT.md** - General deployment issues
 
 **Last Updated**: November 13, 2024 (Phase 1 Account Features - Profile UI Improvements)
+
+
+## AWS Deployment Notes (Nov 13, 2024)
+
+- **AWS Region**: us-east-1 (fixed typo from use-east-1)
+- **Deployment Script**: `deploy-with-role.sh` (uses permanent AWS credentials)
+- **S3 Bucket**: stonkmarketanalyzer-frontend-1762843094
+- **CloudFront Distribution**: E2UZFZ0XAK8XWJ
+- **IAM Role**: arn:aws:iam::938611073268:role/stonkmarketanalyzer
+
+## Latest Session Summary (Nov 13, 2024)
+
+### ✅ Completed
+- Google SSO working on https://stonkmarketanalyzer.com
+- Profile page with improved header design
+- Remember Me checkbox (7 vs 30 day sessions)
+- CORS fixed for PUT/DELETE methods
+- Profile name visibility fixed
+- Deployment script created
+
+### 📝 Notes for Next Session
+- Google SSO works on main domain, add www support if needed
+- Use `deploy-with-role.sh` for frontend deployments
+- AWS credentials configured with permanent access keys
+- All Phase 1 account features deployed and working
