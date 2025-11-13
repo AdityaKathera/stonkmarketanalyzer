@@ -5,6 +5,7 @@ function Profile({ user, onUpdateUser }) {
   const [activeTab, setActiveTab] = useState('info');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
+  const [fullUserData, setFullUserData] = useState(null);
   
   // Profile info state
   const [name, setName] = useState(user?.name || '');
@@ -15,6 +16,33 @@ function Profile({ user, onUpdateUser }) {
     new_password: '',
     confirm_password: ''
   });
+
+  // Fetch full user data on mount
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = localStorage.getItem('auth_token');
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/auth/me`,
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          }
+        );
+        
+        if (response.ok) {
+          const data = await response.json();
+          setFullUserData(data);
+          setName(data.name || '');
+        }
+      } catch (err) {
+        console.error('Failed to fetch user data:', err);
+      }
+    };
+    
+    fetchUserData();
+  }, []);
 
   useEffect(() => {
     setName(user?.name || '');
@@ -113,23 +141,42 @@ function Profile({ user, onUpdateUser }) {
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
+    if (!dateString) return 'Just now';
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return 'Just now';
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (e) {
+      return 'Just now';
+    }
   };
+
+  const displayUser = fullUserData || user;
 
   return (
     <div className="profile-container">
       <div className="profile-header">
         <div className="profile-avatar">
-          {user?.name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || '?'}
+          <span className="avatar-letter">
+            {displayUser?.name?.charAt(0).toUpperCase() || displayUser?.email?.charAt(0).toUpperCase() || '?'}
+          </span>
         </div>
         <div className="profile-header-info">
-          <h2>{user?.name || 'User'}</h2>
-          <p className="profile-email">{user?.email}</p>
+          <h1 className="profile-name">{displayUser?.name || 'User Profile'}</h1>
+          <p className="profile-email">
+            <span className="email-icon">✉️</span>
+            {displayUser?.email}
+          </p>
+          <div className="profile-badges">
+            <span className="badge">👤 Member</span>
+            {displayUser?.email_verified && <span className="badge verified">✓ Verified</span>}
+          </div>
         </div>
       </div>
 
@@ -160,12 +207,18 @@ function Profile({ user, onUpdateUser }) {
           
           <div className="profile-stats">
             <div className="profile-stat">
-              <span className="stat-label">Member Since</span>
-              <span className="stat-value">{formatDate(user?.created_at)}</span>
+              <div className="stat-icon">📅</div>
+              <div className="stat-content">
+                <span className="stat-label">Member Since</span>
+                <span className="stat-value">{formatDate(displayUser?.created_at)}</span>
+              </div>
             </div>
             <div className="profile-stat">
-              <span className="stat-label">Last Login</span>
-              <span className="stat-value">{formatDate(user?.last_login)}</span>
+              <div className="stat-icon">🕐</div>
+              <div className="stat-content">
+                <span className="stat-label">Last Login</span>
+                <span className="stat-value">{formatDate(displayUser?.last_login)}</span>
+              </div>
             </div>
           </div>
 
@@ -188,11 +241,11 @@ function Profile({ user, onUpdateUser }) {
               <input
                 type="email"
                 id="email"
-                value={user?.email || ''}
+                value={displayUser?.email || ''}
                 disabled
                 className="disabled-input"
               />
-              <small className="form-hint">Email cannot be changed</small>
+              <small className="form-hint">✉️ Email cannot be changed for security reasons</small>
             </div>
 
             <button type="submit" className="profile-save-btn" disabled={loading}>
