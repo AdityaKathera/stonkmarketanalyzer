@@ -449,9 +449,20 @@ Ready to build personalized news feed for watchlist stocks!
 - Dark mode: White titles, bright text on rich backgrounds
 - All text weights increased for readability
 - Card shadows and borders enhanced
+- Summary stats: Pure white text with !important overrides
+- Labels: Bold uppercase with letter spacing
+- Values: Extra bold (800) with text shadow
 
 **Status**: ✅ Deployed and working in production
+**Latest Update**: Fixed summary stats visibility with forced white text (Nov 13, 9:41 AM)
+
+### UI Polish (Nov 13, 9:41 AM)
+- Fixed summary stats text visibility
+- Added `!important` overrides for white text
+- Increased font weights and opacity
+- Enhanced text shadows for better contrast
+- All text now crystal clear in both modes
 
 ---
 
-**Last Updated**: November 13, 2024, 9:35 AM UTC
+**Last Updated**: November 13, 2024, 9:41 AM UTC
