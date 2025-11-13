@@ -1,0 +1,300 @@
+.market-overview-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.market-header {
+  margin-bottom: 30px;
+}
+
+.market-header h2 {
+  margin: 0 0 5px 0;
+  font-size: 28px;
+}
+
+.market-header p {
+  margin: 0;
+  color: #666;
+}
+
+.indices-section,
+.movers-section,
+.sectors-section {
+  margin-bottom: 40px;
+}
+
+.indices-section h3,
+.movers-section h3,
+.sectors-section h3 {
+  margin: 0 0 20px 0;
+  font-size: 20px;
+  color: #333;
+}
+
+.indices-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.index-card {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border-left: 4px solid #2962FF;
+  transition: transform 0.2s;
+}
+
+.index-card:hover {
+  transform: translateY(-2px);
+}
+
+.index-card.positive {
+  border-left-color: #26a69a;
+}
+
+.index-card.negative {
+  border-left-color: #ef5350;
+}
+
+.index-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.index-symbol {
+  font-size: 13px;
+  color: #999;
+  margin-bottom: 12px;
+}
+
+.index-price {
+  font-size: 24px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.index-change {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.index-change.positive {
+  color: #26a69a;
+}
+
+.index-change.negative {
+  color: #ef5350;
+}
+
+.movers-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+}
+
+.movers-column h3 {
+  margin-bottom: 15px;
+}
+
+.movers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mover-item {
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-left: 3px solid transparent;
+  transition: transform 0.2s;
+}
+
+.mover-item:hover {
+  transform: translateX(4px);
+}
+
+.mover-item.positive {
+  border-left-color: #26a69a;
+}
+
+.mover-item.negative {
+  border-left-color: #ef5350;
+}
+
+.mover-info {
+  flex: 1;
+}
+
+.mover-ticker {
+  font-size: 16px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 2px;
+}
+
+.mover-name {
+  font-size: 13px;
+  color: #666;
+}
+
+.mover-stats {
+  text-align: right;
+}
+
+.mover-price {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 2px;
+}
+
+.mover-change {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.mover-change.positive {
+  color: #26a69a;
+}
+
+.mover-change.negative {
+  color: #ef5350;
+}
+
+.sectors-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.sector-card {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  text-align: center;
+  border-top: 3px solid transparent;
+  transition: transform 0.2s;
+}
+
+.sector-card:hover {
+  transform: translateY(-2px);
+}
+
+.sector-card.positive {
+  border-top-color: #26a69a;
+}
+
+.sector-card.negative {
+  border-top-color: #ef5350;
+}
+
+.sector-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.sector-change {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.sector-change.positive {
+  color: #26a69a;
+}
+
+.sector-change.negative {
+  color: #ef5350;
+}
+
+.last-updated {
+  text-align: center;
+  color: #999;
+  font-size: 13px;
+  margin-top: 30px;
+}
+
+.loading,
+.error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  color: #666;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #2962FF;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 10px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Dark mode */
+.dark-mode .market-header p {
+  color: #999;
+}
+
+.dark-mode .indices-section h3,
+.dark-mode .movers-section h3,
+.dark-mode .sectors-section h3 {
+  color: #e0e0e0;
+}
+
+.dark-mode .index-card,
+.dark-mode .mover-item,
+.dark-mode .sector-card {
+  background: #1e1e1e;
+}
+
+.dark-mode .index-name,
+.dark-mode .index-price,
+.dark-mode .mover-ticker,
+.dark-mode .mover-price,
+.dark-mode .sector-name {
+  color: #e0e0e0;
+}
+
+.dark-mode .index-symbol,
+.dark-mode .mover-name {
+  color: #999;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .movers-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .indices-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sectors-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+}

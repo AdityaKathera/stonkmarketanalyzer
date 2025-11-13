@@ -7,6 +7,9 @@ function Watchlist({ onSelectStock }) {
   const [watchlist, setWatchlist] = useState([])
   const [newTicker, setNewTicker] = useState('')
   const [analyzing, setAnalyzing] = useState(null)
+  const [prices, setPrices] = useState({})
+  const [loadingPrices, setLoadingPrices] = useState(false)
+  const [sortBy, setSortBy] = useState('added') // 'added', 'ticker', 'change'
 
   useEffect(() => {
     const saved = localStorage.getItem('stonk_watchlist')
@@ -15,9 +18,38 @@ function Watchlist({ onSelectStock }) {
     }
   }, [])
 
+  useEffect(() => {
+    if (watchlist.length > 0) {
+      fetchPrices()
+      const interval = setInterval(fetchPrices, 60000) // Refresh every 60s
+      return () => clearInterval(interval)
+    }
+  }, [watchlist])
+
   const saveWatchlist = (list) => {
     localStorage.setItem('stonk_watchlist', JSON.stringify(list))
     setWatchlist(list)
+  }
+
+  const fetchPrices = async () => {
+    if (watchlist.length === 0) return
+    
+    setLoadingPrices(true)
+    try {
+      const tickers = watchlist.map(item => item.ticker).join(',')
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/stock/prices?tickers=${tickers}`
+      )
+      
+      if (response.ok) {
+        const data = await response.json()
+        setPrices(data.prices || {})
+      }
+    } catch (error) {
+      console.error('Failed to fetch prices:', error)
+    } finally {
+      setLoadingPrices(false)
+    }
   }
 
   const addToWatchlist = () => {
@@ -86,6 +118,23 @@ function Watchlist({ onSelectStock }) {
     return date.toLocaleDateString()
   }
 
+  const getSortedWatchlist = () => {
+    const sorted = [...watchlist]
+    
+    if (sortBy === 'ticker') {
+      sorted.sort((a, b) => a.ticker.localeCompare(b.ticker))
+    } else if (sortBy === 'change') {
+      sorted.sort((a, b) => {
+        const changeA = prices[a.ticker]?.change_percent || 0
+        const changeB = prices[b.ticker]?.change_percent || 0
+        return changeB - changeA
+      })
+    }
+    // Default is 'added' which keeps original order
+    
+    return sorted
+  }
+
   return (
     <div className="watchlist">
       <div className="watchlist-header">
@@ -108,6 +157,25 @@ function Watchlist({ onSelectStock }) {
         </button>
       </div>
 
+      <div className="watchlist-controls">
+        <div className="sort-controls">
+          <label>Sort by:</label>
+          <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+            <option value="added">Date Added</option>
+            <option value="ticker">Ticker</option>
+            <option value="change">Performance</option>
+          </select>
+        </div>
+        <button 
+          onClick={fetchPrices} 
+          disabled={loadingPrices}
+          className="refresh-prices-btn"
+          title="Refresh prices"
+        >
+          {loadingPrices ? '⟳' : '🔄'} Refresh
+        </button>
+      </div>
+
       {watchlist.length === 0 ? (
         <div className="empty-state">
           <div className="empty-icon">📋</div>
@@ -116,37 +184,53 @@ function Watchlist({ onSelectStock }) {
         </div>
       ) : (
         <div className="watchlist-items">
-          {watchlist.map((item) => (
-            <div key={item.ticker} className="watchlist-item">
-              <div className="item-info">
-                <div className="item-ticker">{item.ticker}</div>
-                <div className="item-meta">
-                  Added {formatDate(item.addedAt)}
-                  {item.lastAnalyzed && (
-                    <span className="analyzed-badge">
-                      Analyzed {formatDate(item.lastAnalyzed)}
-                    </span>
+          {getSortedWatchlist().map((item) => {
+            const priceData = prices[item.ticker]
+            const hasPrice = priceData && priceData.price
+            const isPositive = priceData?.change >= 0
+            
+            return (
+              <div key={item.ticker} className={`watchlist-item ${hasPrice ? (isPositive ? 'positive' : 'negative') : ''}`}>
+                <div className="item-info">
+                  <div className="item-ticker">{item.ticker}</div>
+                  {hasPrice ? (
+                    <div className="item-price-info">
+                      <div className="current-price">${priceData.price.toFixed(2)}</div>
+                      <div className={`price-change ${isPositive ? 'positive' : 'negative'}`}>
+                        {isPositive ? '▲' : '▼'} ${Math.abs(priceData.change).toFixed(2)} ({Math.abs(priceData.change_percent).toFixed(2)}%)
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="item-meta">
+                      Added {formatDate(item.addedAt)}
+                      {item.lastAnalyzed && (
+                        <span className="analyzed-badge">
+                          Analyzed {formatDate(item.lastAnalyzed)}
+                        </span>
+                      )}
+                    </div>
                   )}
                 </div>
+                <div className="item-actions">
+                  <button
+                    onClick={() => quickAnalyze(item.ticker)}
+                    disabled={analyzing === item.ticker}
+                    className="analyze-btn"
+                    title="Analyze stock"
+                  >
+                    {analyzing === item.ticker ? '...' : '🔍'}
+                  </button>
+                  <button
+                    onClick={() => removeFromWatchlist(item.ticker)}
+                    className="remove-btn"
+                    title="Remove from watchlist"
+                  >
+                    ✕
+                  </button>
+                </div>
               </div>
-              <div className="item-actions">
-                <button
-                  onClick={() => quickAnalyze(item.ticker)}
-                  disabled={analyzing === item.ticker}
-                  className="analyze-btn"
-                >
-                  {analyzing === item.ticker ? '...' : '🔍'}
-                </button>
-                <button
-                  onClick={() => removeFromWatchlist(item.ticker)}
-                  className="remove-btn"
-                  title="Remove from watchlist"
-                >
-                  ✕
-                </button>
-              </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
 

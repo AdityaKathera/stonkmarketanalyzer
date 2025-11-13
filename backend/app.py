@@ -32,6 +32,10 @@ CORS(app,
 # Register authentication blueprint
 app.register_blueprint(auth_bp)
 
+# Register stock routes blueprint
+from stock_routes import stock_bp
+app.register_blueprint(stock_bp)
+
 perplexity_service = PerplexityService(os.getenv('PERPLEXITY_API_KEY'))
 # Use comprehensive analytics for admin portal
 analytics_service = ComprehensiveAnalytics()

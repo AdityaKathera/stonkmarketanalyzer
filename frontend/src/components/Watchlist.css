@@ -220,3 +220,126 @@
 .dark-mode .empty-hint {
   color: #555;
 }
+
+/* Enhanced Watchlist with Live Prices */
+.watchlist-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.sort-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sort-controls label {
+  font-weight: 500;
+  color: #666;
+}
+
+.sort-controls select {
+  padding: 8px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  background: white;
+}
+
+.refresh-prices-btn {
+  padding: 8px 16px;
+  background: #2962FF;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+
+.refresh-prices-btn:hover:not(:disabled) {
+  background: #1e4fd9;
+}
+
+.refresh-prices-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.item-price-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.current-price {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #333;
+}
+
+.price-change {
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.price-change.positive {
+  color: #26a69a;
+}
+
+.price-change.negative {
+  color: #ef5350;
+}
+
+.watchlist-item.positive {
+  border-left: 4px solid #26a69a;
+}
+
+.watchlist-item.negative {
+  border-left: 4px solid #ef5350;
+}
+
+/* Dark mode for new elements */
+.dark-mode .watchlist-controls {
+  background: #1e1e2e;
+}
+
+.dark-mode .sort-controls label {
+  color: #aaa;
+}
+
+.dark-mode .sort-controls select {
+  background: #2a2a3e;
+  border-color: #3a3a4e;
+  color: #e0e0e0;
+}
+
+.dark-mode .current-price {
+  color: #e0e0e0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .watchlist-controls {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .sort-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .refresh-prices-btn {
+    width: 100%;
+  }
+}

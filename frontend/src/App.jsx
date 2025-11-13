@@ -9,11 +9,14 @@ import NewsSection from './components/NewsSection'
 import SocialSentiment from './components/SocialSentiment'
 import FloatingChat from './components/FloatingChat'
 import AuthModal from './components/AuthModal'
+import StockChart from './components/StockChart'
+import PriceAlerts from './components/PriceAlerts'
+import MarketOverview from './components/MarketOverview'
 import analytics from './analytics'
 import './App.css'
 
 function App() {
-  const [mode, setMode] = useState('guided') // 'guided', 'compare', 'watchlist', 'portfolio', 'profile', 'news', 'sentiment'
+  const [mode, setMode] = useState('guided') // 'guided', 'compare', 'watchlist', 'portfolio', 'profile', 'news', 'sentiment', 'alerts', 'market'
   const [ticker, setTicker] = useState('')
   const [horizon, setHorizon] = useState('1-3 years')
   const [riskLevel, setRiskLevel] = useState('moderate')
@@ -210,6 +213,12 @@ function App() {
           >
             ⭐ Watchlist
           </button>
+          <button
+            className={mode === 'market' ? 'active' : ''}
+            onClick={() => handleModeChange('market')}
+          >
+            🌍 Market
+          </button>
           {user && (
             <>
               <button
@@ -217,6 +226,12 @@ function App() {
                 onClick={() => handleModeChange('portfolio')}
               >
                 💼 Portfolio
+              </button>
+              <button
+                className={mode === 'alerts' ? 'active' : ''}
+                onClick={() => handleModeChange('alerts')}
+              >
+                ⚠️ Alerts
               </button>
               <button
                 className={mode === 'news' ? 'active' : ''}
@@ -243,7 +258,10 @@ function App() {
 
       <main className="main-content">
         {mode === 'guided' && (
-          <ResearchFlow ticker={ticker} horizon={horizon} riskLevel={riskLevel} />
+          <>
+            <ResearchFlow ticker={ticker} horizon={horizon} riskLevel={riskLevel} />
+            {ticker && <StockChart ticker={ticker} />}
+          </>
         )}
         {mode === 'compare' && (
           <StockComparison />
@@ -251,8 +269,14 @@ function App() {
         {mode === 'watchlist' && (
           <Watchlist onSelectStock={(t) => { setTicker(t); setMode('guided'); }} />
         )}
+        {mode === 'market' && (
+          <MarketOverview />
+        )}
         {mode === 'portfolio' && user && (
           <Portfolio user={user} />
+        )}
+        {mode === 'alerts' && user && (
+          <PriceAlerts user={user} />
         )}
         {mode === 'news' && user && (
           <NewsSection />
