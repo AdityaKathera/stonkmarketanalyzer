@@ -12,11 +12,13 @@ import AuthModal from './components/AuthModal'
 import StockChart from './components/StockChart'
 import PriceAlerts from './components/PriceAlerts'
 import MarketOverview from './components/MarketOverview'
+import PortfolioDoctor from './components/PortfolioDoctor'
+import SmartRebalance from './components/SmartRebalance'
 import analytics from './analytics'
 import './App.css'
 
 function App() {
-  const [mode, setMode] = useState('guided') // 'guided', 'compare', 'watchlist', 'portfolio', 'profile', 'news', 'sentiment', 'alerts', 'market'
+  const [mode, setMode] = useState('guided') // 'guided', 'compare', 'watchlist', 'portfolio', 'profile', 'news', 'sentiment', 'alerts', 'market', 'doctor', 'rebalance'
   const [ticker, setTicker] = useState('')
   const [horizon, setHorizon] = useState('1-3 years')
   const [riskLevel, setRiskLevel] = useState('moderate')
@@ -228,6 +230,18 @@ function App() {
                 💼 Portfolio
               </button>
               <button
+                className={mode === 'doctor' ? 'active' : ''}
+                onClick={() => handleModeChange('doctor')}
+              >
+                🩺 Doctor
+              </button>
+              <button
+                className={mode === 'rebalance' ? 'active' : ''}
+                onClick={() => handleModeChange('rebalance')}
+              >
+                ⚖️ Rebalance
+              </button>
+              <button
                 className={mode === 'alerts' ? 'active' : ''}
                 onClick={() => handleModeChange('alerts')}
               >
@@ -274,6 +288,12 @@ function App() {
         )}
         {mode === 'portfolio' && user && (
           <Portfolio user={user} />
+        )}
+        {mode === 'doctor' && user && (
+          <PortfolioDoctor user={user} />
+        )}
+        {mode === 'rebalance' && user && (
+          <SmartRebalance user={user} />
         )}
         {mode === 'alerts' && user && (
           <PriceAlerts user={user} />

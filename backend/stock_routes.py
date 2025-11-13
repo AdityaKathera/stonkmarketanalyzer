@@ -158,3 +158,45 @@ def get_market_overview():
     except Exception as e:
         logger.error(f"Error fetching market overview: {str(e)}")
         return jsonify({'error': 'Internal server error'}), 500
+
+
+@stock_bp.route('/api/portfolio/doctor', methods=['GET'])
+@require_auth
+def get_portfolio_doctor(user_id):
+    """Get AI portfolio doctor recommendations"""
+    try:
+        from portfolio_doctor_service import portfolio_doctor
+        from portfolio_service import portfolio_service
+        
+        # Get portfolio data
+        portfolio_data = portfolio_service.get_portfolio_summary(user_id)
+        
+        # Generate recommendations
+        recommendations = portfolio_doctor.get_daily_recommendations(portfolio_data)
+        
+        return jsonify(recommendations)
+        
+    except Exception as e:
+        logger.error(f"Error getting portfolio doctor: {str(e)}")
+        return jsonify({'error': 'Internal server error'}), 500
+
+
+@stock_bp.route('/api/portfolio/rebalance', methods=['GET'])
+@require_auth
+def get_rebalancing_plan(user_id):
+    """Get smart rebalancing suggestions"""
+    try:
+        from rebalancing_service import rebalancing_service
+        from portfolio_service import portfolio_service
+        
+        # Get portfolio data
+        portfolio_data = portfolio_service.get_portfolio_summary(user_id)
+        
+        # Generate rebalancing plan
+        plan = rebalancing_service.generate_rebalancing_plan(portfolio_data)
+        
+        return jsonify(plan)
+        
+    except Exception as e:
+        logger.error(f"Error generating rebalancing plan: {str(e)}")
+        return jsonify({'error': 'Internal server error'}), 500
