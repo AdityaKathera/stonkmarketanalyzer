@@ -15,8 +15,9 @@ from collections import defaultdict
 
 # Generate secure secret key (store this in .env in production)
 SECRET_KEY = os.getenv('PORTAL_SECRET_KEY', secrets.token_urlsafe(64))
-PORTAL_PATH = os.getenv('PORTAL_PATH', 'x9k2m7p4q8w1')  # Obscure path
+PORTAL_PATH = os.getenv('PORTAL_PATH', secrets.token_urlsafe(12))  # Obscure path - will be fixed if set in .env
 PORTAL_USERNAME = os.getenv('PORTAL_USERNAME', 'sentinel_' + secrets.token_hex(4))
+PORTAL_PASSWORD = os.getenv('PORTAL_PASSWORD', '')  # Plain password from .env
 PORTAL_PASSWORD_HASH = os.getenv('PORTAL_PASSWORD_HASH', '')  # Will be set on first run
 
 # Security: Rate limiting and brute force protection
@@ -206,17 +207,25 @@ def setup_portal_routes(app, analytics_service):
                 'attempts_left': max(0, attempts_left)
             }), 401
         
-        if not PORTAL_PASSWORD_HASH:
-            # First time setup - set password
+        # Check password - support both plain password and hash
+        password_valid = False
+        
+        if PORTAL_PASSWORD:
+            # Use plain password from .env (simpler for single admin)
+            password_valid = (password == PORTAL_PASSWORD)
+        elif PORTAL_PASSWORD_HASH:
+            # Use hashed password (more secure)
+            password_valid = verify_password(password, PORTAL_PASSWORD_HASH)
+        else:
+            # First time setup - accept any password and show hash
             password_hash = hash_password(password)
-            # In production, save this to .env
             return jsonify({
                 'message': 'First time setup',
                 'password_hash': password_hash,
-                'note': 'Save this hash to PORTAL_PASSWORD_HASH in .env'
+                'note': 'Save this hash to PORTAL_PASSWORD_HASH in .env or set PORTAL_PASSWORD'
             }), 200
         
-        if not verify_password(password, PORTAL_PASSWORD_HASH):
+        if not password_valid:
             is_locked = record_failed_attempt(ip)
             attempts_left = MAX_ATTEMPTS - len(login_attempts[ip])
             
