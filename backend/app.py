@@ -23,7 +23,11 @@ app = Flask(__name__)
 
 # Configure CORS with environment-based origins
 allowed_origins = os.getenv('ALLOWED_ORIGINS', 'http://localhost:5173').split(',')
-CORS(app, origins=allowed_origins)
+CORS(app, 
+     origins=allowed_origins,
+     methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+     allow_headers=['Content-Type', 'Authorization'],
+     supports_credentials=True)
 
 # Register authentication blueprint
 app.register_blueprint(auth_bp)
