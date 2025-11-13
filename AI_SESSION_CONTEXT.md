@@ -306,3 +306,10 @@ aws cloudfront create-invalidation --distribution-id E2UZFZ0XAK8XWJ --paths "/*"
 - AWS credentials configured with permanent access keys
 - All Phase 1 account features deployed and working
 - User menu styling complete with proper visibility
+
+### 🎯 Next Task: Account Linking
+**User wants to build:** Account Linking feature (see `NEXT_SESSION_TASK.md`)
+- Allow users to link Google account to existing email/password account
+- Show linked providers in Profile page
+- Prevent duplicate accounts
+- Estimated time: 2-3 hours
