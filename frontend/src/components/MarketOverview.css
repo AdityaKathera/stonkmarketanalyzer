@@ -11,11 +11,15 @@
 .market-header h2 {
   margin: 0 0 5px 0;
   font-size: 28px;
+  color: #1a1a1a;
+  font-weight: 700;
 }
 
 .market-header p {
   margin: 0;
-  color: #666;
+  color: #333;
+  font-weight: 500;
+  font-size: 16px;
 }
 
 .indices-section,
@@ -28,8 +32,9 @@
 .movers-section h3,
 .sectors-section h3 {
   margin: 0 0 20px 0;
-  font-size: 20px;
-  color: #333;
+  font-size: 22px;
+  color: #1a1a1a;
+  font-weight: 700;
 }
 
 .indices-grid {
@@ -61,8 +66,8 @@
 
 .index-name {
   font-size: 18px;
-  font-weight: 600;
-  color: #333;
+  font-weight: 700;
+  color: #1a1a1a;
   margin-bottom: 4px;
 }
 
@@ -73,9 +78,9 @@
 }
 
 .index-price {
-  font-size: 24px;
-  font-weight: 700;
-  color: #333;
+  font-size: 26px;
+  font-weight: 800;
+  color: #1a1a1a;
   margin-bottom: 8px;
 }
 
@@ -139,13 +144,14 @@
 .mover-ticker {
   font-size: 16px;
   font-weight: 700;
-  color: #333;
+  color: #1a1a1a;
   margin-bottom: 2px;
 }
 
 .mover-name {
   font-size: 13px;
-  color: #666;
+  color: #555;
+  font-weight: 500;
 }
 
 .mover-stats {
@@ -154,8 +160,8 @@
 
 .mover-price {
   font-size: 16px;
-  font-weight: 600;
-  color: #333;
+  font-weight: 700;
+  color: #1a1a1a;
   margin-bottom: 2px;
 }
 
@@ -202,8 +208,8 @@
 
 .sector-name {
   font-size: 15px;
-  font-weight: 600;
-  color: #333;
+  font-weight: 700;
+  color: #1a1a1a;
   margin-bottom: 10px;
 }
 

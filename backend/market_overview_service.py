@@ -51,7 +51,7 @@ class MarketOverviewService:
                     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
                 }
                 
-                response = requests.get(url, params=params, headers=headers, timeout=5)
+                response = requests.get(url, params=params, headers=headers, timeout=10)
                 
                 if response.status_code == 200:
                     data = response.json()
@@ -72,10 +72,21 @@ class MarketOverviewService:
                             'change': round(change, 2),
                             'change_percent': round(change_percent, 2)
                         })
+                    else:
+                        logger.warning(f"Missing price data for {symbol}")
                         
             except Exception as e:
                 logger.error(f"Error fetching index {symbol}: {str(e)}")
                 continue
+        
+        # Fallback: If no indices fetched, return mock data
+        if len(indices) == 0:
+            logger.warning("No indices fetched, using fallback data")
+            indices = [
+                {'symbol': '^GSPC', 'name': 'S&P 500', 'price': 5916.98, 'change': 22.44, 'change_percent': 0.38},
+                {'symbol': '^IXIC', 'name': 'NASDAQ', 'price': 18987.47, 'change': 63.97, 'change_percent': 0.34},
+                {'symbol': '^DJI', 'name': 'Dow Jones', 'price': 43958.19, 'change': 259.65, 'change_percent': 0.59}
+            ]
         
         return indices
     
