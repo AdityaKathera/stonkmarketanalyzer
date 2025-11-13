@@ -60,9 +60,17 @@ export default function PortfolioDoctor({ user }) {
 
   const getHealthColor = (score) => {
     if (score >= 80) return 'excellent';
-    if (score >= 60) return 'good';
-    if (score >= 40) return 'fair';
+    if (score >= 65) return 'good';
+    if (score >= 50) return 'fair';
     return 'poor';
+  };
+
+  const getHealthLabel = (score) => {
+    if (score >= 80) return 'Excellent';
+    if (score >= 65) return 'Good';
+    if (score >= 50) return 'Fair';
+    if (score === 50) return 'Getting Started';
+    return 'Needs Attention';
   };
 
   const getPriorityColor = (priority) => {
@@ -89,7 +97,14 @@ export default function PortfolioDoctor({ user }) {
           <div className="health-score-number">{health_score}</div>
           <div className="health-score-label">
             <div className="health-title">Portfolio Health Score</div>
-            <div className="health-status">{getHealthColor(health_score).toUpperCase()}</div>
+            <div className="health-status">{getHealthLabel(health_score)}</div>
+            <div className="health-description">
+              {health_score >= 80 && "Your portfolio is well-balanced and healthy"}
+              {health_score >= 65 && health_score < 80 && "Your portfolio is in good shape"}
+              {health_score >= 50 && health_score < 65 && "Your portfolio needs some improvements"}
+              {health_score < 50 && health_score > 0 && "Review the recommendations below"}
+              {health_score === 50 && "Add stocks to get personalized analysis"}
+            </div>
           </div>
         </div>
         <div className="health-bar">
