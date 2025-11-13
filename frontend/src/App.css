@@ -1738,20 +1738,22 @@ html {
 
 .logout-btn {
   padding: 8px 16px;
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444 !important;
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: #ef4444;
+  color: #ffffff !important;
+  border: 1px solid #dc2626;
   border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
   font-weight: 600;
   transition: all 0.2s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .logout-btn:hover {
-  background: rgba(239, 68, 68, 0.2);
-  border-color: #ef4444;
-  color: #ef4444 !important;
+  background: #dc2626;
+  border-color: #b91c1c;
+  color: #ffffff !important;
+  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.3);
 }
 
 /* Dark mode user menu */
@@ -1768,13 +1770,14 @@ html {
 }
 
 .dark-mode .logout-btn {
-  background: rgba(248, 113, 113, 0.15);
-  color: #fca5a5 !important;
-  border-color: rgba(248, 113, 113, 0.3);
+  background: #dc2626;
+  color: #ffffff !important;
+  border-color: #b91c1c;
 }
 
 .dark-mode .logout-btn:hover {
-  background: rgba(248, 113, 113, 0.25);
-  border-color: #f87171;
-  color: #fecaca !important;
+  background: #b91c1c;
+  border-color: #991b1b;
+  color: #ffffff !important;
+  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.4);
 }
