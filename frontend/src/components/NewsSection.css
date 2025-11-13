@@ -106,9 +106,9 @@
 
 .filter-btn {
   padding: 10px 20px;
-  background: rgba(102, 126, 234, 0.08);
-  color: #5b6fd8;
-  border: 2px solid rgba(102, 126, 234, 0.2);
+  background: #f1f5f9;
+  color: #334155;
+  border: 2px solid #cbd5e1;
   border-radius: 24px;
   font-size: 14px;
   font-weight: 700;
@@ -119,7 +119,7 @@
 
 .filter-btn:hover {
   border-color: #667eea;
-  background: rgba(102, 126, 234, 0.15);
+  background: #e0e7ff;
   color: #4c5fd1;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
@@ -499,19 +499,20 @@ body.dark-mode .news-key-points li::marker {
 }
 
 body.dark-mode .filter-btn {
-  background: rgba(129, 140, 248, 0.1);
-  border-color: rgba(129, 140, 248, 0.3);
-  color: #818cf8;
+  background: #1e293b;
+  border-color: #475569;
+  color: #cbd5e1;
 }
 
 body.dark-mode .filter-btn:hover {
   border-color: #818cf8;
-  background: rgba(129, 140, 248, 0.2);
+  background: #334155;
+  color: #e0e7ff;
 }
 
 body.dark-mode .filter-btn.active {
   background: linear-gradient(135deg, #818cf8 0%, #a78bfa 100%);
-  color: white;
+  color: white !important;
 }
 
 body.dark-mode .news-footer {
