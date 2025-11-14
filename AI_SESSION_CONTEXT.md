@@ -821,24 +821,49 @@ Phase 2 AI Features complete! All systems working. Ready for Phase 3.
 
 ---
 
-## 🔧 Bug Fixes (November 14, 2024)
+## 🔧 Bug Fixes & New Features (November 14, 2024)
 
-### ✅ Market Overview Fixed
-- **Issue 1**: Top movers showing hardcoded/incorrect data
+### ✅ Multi-Country Market Overview - COMPLETE
+- **New Feature**: Support for 3 countries (US, India, UK)
+- **Features**:
+  - 🌍 Country selector with beautiful UI (US 🇺🇸, India 🇮🇳, UK 🇬🇧)
+  - 📊 Country-specific indices (S&P 500, NIFTY 50, FTSE 100, etc.)
+  - 📈 Real-time top gainers and losers for each country
+  - ⚡ 5-minute caching for faster load times
+  - 🔄 Auto-refresh every 5 minutes
+  - 🎨 Beautiful gradient country badge
+  - 🌓 Full dark mode support
+- **Countries Supported**:
+  - **United States**: S&P 500, NASDAQ, Dow Jones + 30 popular stocks
+  - **India**: NIFTY 50, SENSEX, BANK NIFTY + 25 NSE stocks
+  - **United Kingdom**: FTSE 100, FTSE 250, FTSE All-Share + 24 LSE stocks
+- **Technical Improvements**:
+  - Batch API calls for better performance (10 stocks per request)
+  - In-memory caching with 5-minute TTL
+  - Better error handling and logging
+  - Fallback for empty movers data
+- **Files Modified**:
+  - `backend/market_overview_service.py` - Multi-country support + caching
+  - `backend/stock_routes.py` - Country parameter + countries endpoint
+  - `frontend/src/components/MarketOverview.jsx` - Country selector UI
+  - `frontend/src/components/MarketOverview.css` - New styling
+- **New Endpoints**:
+  - `GET /api/market/overview?country=US` - Get market data for country
+  - `GET /api/market/countries` - Get list of available countries
+- **Status**: ✅ Deployed and working
+- **Commits**: 8348fba, fbfb271
+
+### ✅ Market Overview Bug Fixes
+- **Issue 1**: Top movers showing empty/no data
 - **Issue 2**: Font visibility issues in both light and dark modes
 - **Solution**: 
-  - Implemented real-time data fetching for 24 popular stocks
-  - Dynamically sorts to find actual top gainers and losers
-  - Fixed all text colors with !important overrides for visibility
-  - Enhanced dark mode contrast with white text on dark backgrounds
-- **Files Modified**:
-  - `backend/market_overview_service.py` - Real-time movers data
-  - `frontend/src/components/MarketOverview.css` - Font visibility fixes
-- **Status**: ✅ Deployed and working
-- **Commit**: 8348fba
+  - Implemented batch fetching for better reliability
+  - Fixed all text colors with !important overrides
+  - Enhanced dark mode contrast
+  - Added "no data" message when movers unavailable
 
 ---
 
-**Last Updated**: November 14, 2024, 4:17 AM UTC
-**Session Status**: ✅ Market Overview fixed - Real data + visible fonts
+**Last Updated**: November 14, 2024, 5:30 AM UTC
+**Session Status**: ✅ Multi-Country Market Overview complete with caching
 **Ready for**: Next feature or improvement 🚀

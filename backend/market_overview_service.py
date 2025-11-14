@@ -155,72 +155,45 @@ class MarketOverviewService:
     def _fetch_index_data(self, symbol: str, name: str) -> Optional[Dict]:
         """Fetch index data from Yahoo Finance chart API"""
         try:
-            url = f"https://query1.finance.yahoo.com/v8/finance/chart/{symbol}"
+            url = f"https://query2.finance.yahoo.com/v8/finance/chart/{symbol}"
             params = {'interval': '1d', 'range': '1d'}
             headers = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept': 'application/json',
+                'Accept-Language': 'en-US,en;q=0.9',
+                'Referer': 'https://finance.yahoo.com/'
             }
             
             response = requests.get(url, params=params, headers=headers, timeout=10)
             
             if response.status_code == 200:
                 data = response.json()
-                result = data['chart']['result'][0]
-                meta = result.get('meta', {})
-                
-                current_price = meta.get('regularMarketPrice')
-                previous_close = meta.get('previousClose')
-                
-                if current_price and previous_close:
-                    change = current_price - previous_close
-                    change_percent = (change / previous_close * 100)
+                if 'chart' in data and 'result' in data['chart'] and data['chart']['result']:
+                    result = data['chart']['result'][0]
+                    meta = result.get('meta', {})
                     
-                    return {
-                        'symbol': symbol,
-                        'name': name,
-                        'price': round(current_price, 2),
-                        'change': round(change, 2),
-                        'change_percent': round(change_percent, 2)
-                    }
+                    current_price = meta.get('regularMarketPrice')
+                    previous_close = meta.get('previousClose') or meta.get('chartPreviousClose')
+                    
+                    if current_price and previous_close:
+                        change = current_price - previous_close
+                        change_percent = (change / previous_close * 100)
+                        
+                        return {
+                            'symbol': symbol,
+                            'name': name,
+                            'price': round(current_price, 2),
+                            'change': round(change, 2),
+                            'change_percent': round(change_percent, 2)
+                        }
         except Exception as e:
             logger.debug(f"Error fetching {symbol} from chart API: {str(e)}")
         
         return None
     
     def _fetch_index_data_alt(self, symbol: str, name: str) -> Optional[Dict]:
-        """Fetch index data from Yahoo Finance quote API (alternative)"""
-        try:
-            url = f"https://query1.finance.yahoo.com/v7/finance/quote"
-            params = {'symbols': symbol}
-            headers = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-            }
-            
-            response = requests.get(url, params=params, headers=headers, timeout=10)
-            
-            if response.status_code == 200:
-                data = response.json()
-                if 'quoteResponse' in data and 'result' in data['quoteResponse']:
-                    results = data['quoteResponse']['result']
-                    if results and len(results) > 0:
-                        quote = results[0]
-                        current_price = quote.get('regularMarketPrice')
-                        previous_close = quote.get('regularMarketPreviousClose')
-                        
-                        if current_price and previous_close:
-                            change = current_price - previous_close
-                            change_percent = (change / previous_close * 100)
-                            
-                            return {
-                                'symbol': symbol,
-                                'name': name,
-                                'price': round(current_price, 2),
-                                'change': round(change, 2),
-                                'change_percent': round(change_percent, 2)
-                            }
-        except Exception as e:
-            logger.debug(f"Error fetching {symbol} from quote API: {str(e)}")
-        
+        """Fetch index data from Yahoo Finance quote API (alternative) - DISABLED"""
+        # This endpoint is returning 401, skip it
         return None
     
     def _get_top_movers(self, popular_tickers: List[str]):
@@ -234,26 +207,36 @@ class MarketOverviewService:
             # Fetch real-time data for popular stocks
             all_stocks = []
             
-            # Use batch API for better performance
+            # Try batch API first
             batch_size = 10
             for i in range(0, len(popular_tickers), batch_size):
                 batch = popular_tickers[i:i+batch_size]
                 batch_stocks = self._fetch_batch_quotes(batch)
                 all_stocks.extend(batch_stocks)
-                time.sleep(0.1)  # Small delay to avoid rate limiting
+                time.sleep(0.2)  # Small delay to avoid rate limiting
+            
+            # If batch API failed, try individual fetching for first 15 stocks
+            if len(all_stocks) < 5:
+                logger.warning(f"Batch API returned only {len(all_stocks)} stocks, trying individual fetching")
+                all_stocks = []
+                for ticker in popular_tickers[:15]:  # Limit to 15 to avoid timeout
+                    stock_data = self._fetch_single_stock(ticker)
+                    if stock_data:
+                        all_stocks.append(stock_data)
+                    time.sleep(0.1)
             
             # Sort and get top 5 gainers and losers
-            if all_stocks:
+            if all_stocks and len(all_stocks) >= 5:
                 all_stocks.sort(key=lambda x: x['change_percent'], reverse=True)
                 movers['gainers'] = all_stocks[:5]
                 movers['losers'] = all_stocks[-5:][::-1]  # Reverse to show worst first
                 
                 logger.info(f"Found {len(all_stocks)} stocks, {len(movers['gainers'])} gainers, {len(movers['losers'])} losers")
             else:
-                logger.warning("No movers data fetched")
+                logger.warning(f"Insufficient movers data: only {len(all_stocks)} stocks fetched")
             
         except Exception as e:
-            logger.error(f"Error fetching movers: {str(e)}")
+            logger.error(f"Error fetching movers: {str(e)}", exc_info=True)
         
         return movers
     
@@ -261,45 +244,55 @@ class MarketOverviewService:
         """Fetch quotes for multiple tickers in one request"""
         stocks = []
         
+        # Yahoo Finance batch API is unreliable, use individual fetching instead
+        logger.info(f"Fetching {len(tickers)} stocks individually")
+        
+        for ticker in tickers:
+            stock_data = self._fetch_single_stock(ticker)
+            if stock_data:
+                stocks.append(stock_data)
+            time.sleep(0.15)  # Rate limiting
+        
+        return stocks
+    
+    def _fetch_single_stock(self, ticker: str) -> Optional[Dict]:
+        """Fetch data for a single stock (fallback method)"""
         try:
-            symbols = ','.join(tickers)
-            url = f"https://query1.finance.yahoo.com/v7/finance/quote"
-            params = {'symbols': symbols}
+            # Try chart API first
+            url = f"https://query2.finance.yahoo.com/v8/finance/chart/{ticker}"
+            params = {'interval': '1d', 'range': '1d'}
             headers = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept': 'application/json',
+                'Accept-Language': 'en-US,en;q=0.9',
+                'Referer': 'https://finance.yahoo.com/'
             }
             
             response = requests.get(url, params=params, headers=headers, timeout=10)
             
             if response.status_code == 200:
                 data = response.json()
-                if 'quoteResponse' in data and 'result' in data['quoteResponse']:
-                    results = data['quoteResponse']['result']
+                if 'chart' in data and 'result' in data['chart'] and data['chart']['result']:
+                    result = data['chart']['result'][0]
+                    meta = result.get('meta', {})
                     
-                    for quote in results:
-                        try:
-                            ticker = quote.get('symbol')
-                            current_price = quote.get('regularMarketPrice')
-                            previous_close = quote.get('regularMarketPreviousClose')
-                            long_name = quote.get('longName') or quote.get('shortName') or ticker
-                            
-                            if current_price and previous_close and current_price > 0 and previous_close > 0:
-                                change_percent = ((current_price - previous_close) / previous_close * 100)
-                                
-                                stocks.append({
-                                    'ticker': ticker,
-                                    'name': long_name,
-                                    'price': round(current_price, 2),
-                                    'change_percent': round(change_percent, 2)
-                                })
-                        except Exception as e:
-                            logger.debug(f"Error processing quote: {str(e)}")
-                            continue
-                            
+                    current_price = meta.get('regularMarketPrice')
+                    previous_close = meta.get('previousClose') or meta.get('chartPreviousClose')
+                    long_name = meta.get('longName') or meta.get('shortName') or ticker
+                    
+                    if current_price and previous_close and current_price > 0 and previous_close > 0:
+                        change_percent = ((current_price - previous_close) / previous_close * 100)
+                        
+                        return {
+                            'ticker': ticker,
+                            'name': long_name,
+                            'price': round(current_price, 2),
+                            'change_percent': round(change_percent, 2)
+                        }
         except Exception as e:
-            logger.error(f"Error fetching batch quotes: {str(e)}")
+            logger.debug(f"Error fetching single stock {ticker}: {str(e)}")
         
-        return stocks
+        return None
     
     def _get_sector_performance(self, sectors: List[tuple]):
         """Get sector performance"""
@@ -307,30 +300,34 @@ class MarketOverviewService:
         
         for symbol, name in sectors:
             try:
-                url = f"https://query1.finance.yahoo.com/v8/finance/chart/{symbol}"
+                url = f"https://query2.finance.yahoo.com/v8/finance/chart/{symbol}"
                 params = {'interval': '1d', 'range': '1d'}
                 headers = {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                    'Accept': 'application/json',
+                    'Accept-Language': 'en-US,en;q=0.9',
+                    'Referer': 'https://finance.yahoo.com/'
                 }
                 
-                response = requests.get(url, params=params, headers=headers, timeout=5)
+                response = requests.get(url, params=params, headers=headers, timeout=10)
                 
                 if response.status_code == 200:
                     data = response.json()
-                    result = data['chart']['result'][0]
-                    meta = result.get('meta', {})
-                    
-                    current_price = meta.get('regularMarketPrice')
-                    previous_close = meta.get('previousClose')
-                    
-                    if current_price and previous_close:
-                        change_percent = ((current_price - previous_close) / previous_close * 100)
+                    if 'chart' in data and 'result' in data['chart'] and data['chart']['result']:
+                        result = data['chart']['result'][0]
+                        meta = result.get('meta', {})
                         
-                        sector_data.append({
-                            'name': name,
-                            'symbol': symbol,
-                            'change_percent': round(change_percent, 2)
-                        })
+                        current_price = meta.get('regularMarketPrice')
+                        previous_close = meta.get('previousClose') or meta.get('chartPreviousClose')
+                        
+                        if current_price and previous_close:
+                            change_percent = ((current_price - previous_close) / previous_close * 100)
+                            
+                            sector_data.append({
+                                'name': name,
+                                'symbol': symbol,
+                                'change_percent': round(change_percent, 2)
+                            })
                         
             except Exception as e:
                 logger.debug(f"Error fetching sector {symbol}: {str(e)}")
