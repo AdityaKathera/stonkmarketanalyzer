@@ -172,51 +172,59 @@ class MarketOverviewService:
     
     def _get_top_movers(self):
         """Get top gainers and losers"""
-        # Using Yahoo Finance screener API
         movers = {
             'gainers': [],
             'losers': []
         }
         
+        # Popular stocks to check for movers
+        popular_tickers = [
+            'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'TSLA', 'META', 'AMD', 
+            'NFLX', 'DIS', 'BA', 'INTC', 'PYPL', 'COIN', 'UBER', 'ABNB',
+            'SHOP', 'SQ', 'SNAP', 'PINS', 'ROKU', 'ZM', 'DOCU', 'TWLO'
+        ]
+        
         try:
-            # Top gainers
-            gainers_url = "https://query1.finance.yahoo.com/v1/finance/screener"
-            gainers_payload = {
-                "size": 5,
-                "offset": 0,
-                "sortField": "percentchange",
-                "sortType": "DESC",
-                "quoteType": "EQUITY",
-                "query": {
-                    "operator": "AND",
-                    "operands": [
-                        {"operator": "gt", "operands": ["intradaymarketcap", 2000000000]},
-                        {"operator": "gt", "operands": ["percentchange", 0]}
-                    ]
-                }
-            }
+            # Fetch real-time data for popular stocks
+            all_stocks = []
             
-            headers = {
-                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
-            }
+            for ticker in popular_tickers:
+                try:
+                    url = f"https://query1.finance.yahoo.com/v8/finance/chart/{ticker}"
+                    params = {'interval': '1d', 'range': '1d'}
+                    headers = {
+                        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
+                    }
+                    
+                    response = requests.get(url, params=params, headers=headers, timeout=5)
+                    
+                    if response.status_code == 200:
+                        data = response.json()
+                        result = data['chart']['result'][0]
+                        meta = result.get('meta', {})
+                        
+                        current_price = meta.get('regularMarketPrice')
+                        previous_close = meta.get('previousClose')
+                        long_name = meta.get('longName', ticker)
+                        
+                        if current_price and previous_close:
+                            change_percent = ((current_price - previous_close) / previous_close * 100)
+                            
+                            all_stocks.append({
+                                'ticker': ticker,
+                                'name': long_name,
+                                'price': current_price,
+                                'change_percent': change_percent
+                            })
+                except Exception as e:
+                    logger.debug(f"Error fetching {ticker}: {str(e)}")
+                    continue
             
-            # For simplicity, using hardcoded popular movers
-            # In production, you'd use a proper API or scraper
-            movers['gainers'] = [
-                {'ticker': 'NVDA', 'name': 'NVIDIA Corp', 'price': 495.50, 'change_percent': 5.2},
-                {'ticker': 'TSLA', 'name': 'Tesla Inc', 'price': 242.80, 'change_percent': 4.8},
-                {'ticker': 'AMD', 'name': 'AMD Inc', 'price': 165.30, 'change_percent': 3.9},
-                {'ticker': 'META', 'name': 'Meta Platforms', 'price': 485.20, 'change_percent': 3.5},
-                {'ticker': 'AAPL', 'name': 'Apple Inc', 'price': 189.50, 'change_percent': 2.1}
-            ]
-            
-            movers['losers'] = [
-                {'ticker': 'INTC', 'name': 'Intel Corp', 'price': 42.30, 'change_percent': -4.2},
-                {'ticker': 'DIS', 'name': 'Walt Disney', 'price': 95.80, 'change_percent': -3.8},
-                {'ticker': 'BA', 'name': 'Boeing Co', 'price': 178.50, 'change_percent': -3.1},
-                {'ticker': 'NFLX', 'name': 'Netflix Inc', 'price': 485.20, 'change_percent': -2.5},
-                {'ticker': 'PYPL', 'name': 'PayPal', 'price': 62.40, 'change_percent': -2.2}
-            ]
+            # Sort and get top 5 gainers and losers
+            if all_stocks:
+                all_stocks.sort(key=lambda x: x['change_percent'], reverse=True)
+                movers['gainers'] = all_stocks[:5]
+                movers['losers'] = all_stocks[-5:][::-1]  # Reverse to show worst first
             
         except Exception as e:
             logger.error(f"Error fetching movers: {str(e)}")

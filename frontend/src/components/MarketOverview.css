@@ -266,20 +266,26 @@
 }
 
 /* Dark mode */
+.dark-mode .market-header h2 {
+  color: #ffffff !important;
+}
+
 .dark-mode .market-header p {
-  color: #999;
+  color: #b0b0b0 !important;
 }
 
 .dark-mode .indices-section h3,
 .dark-mode .movers-section h3,
 .dark-mode .sectors-section h3 {
-  color: #e0e0e0;
+  color: #ffffff !important;
+  font-weight: 700;
 }
 
 .dark-mode .index-card,
 .dark-mode .mover-item,
 .dark-mode .sector-card {
   background: #1e1e1e;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
 .dark-mode .index-name,
@@ -287,12 +293,25 @@
 .dark-mode .mover-ticker,
 .dark-mode .mover-price,
 .dark-mode .sector-name {
-  color: #e0e0e0;
+  color: #ffffff !important;
+  font-weight: 700;
 }
 
-.dark-mode .index-symbol,
+.dark-mode .index-symbol {
+  color: #888 !important;
+}
+
 .dark-mode .mover-name {
-  color: #999;
+  color: #b0b0b0 !important;
+  font-weight: 500;
+}
+
+.dark-mode .index-note {
+  color: #888 !important;
+}
+
+.dark-mode .last-updated {
+  color: #888 !important;
 }
 
 /* Responsive */
