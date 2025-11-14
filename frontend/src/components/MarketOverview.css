@@ -6,20 +6,92 @@
 
 .market-header {
   margin-bottom: 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
 }
 
-.market-header h2 {
+.market-title-section h2 {
   margin: 0 0 5px 0;
   font-size: 28px;
   color: #1a1a1a;
   font-weight: 700;
 }
 
-.market-header p {
+.market-title-section p {
   margin: 0;
   color: #333;
   font-weight: 500;
   font-size: 16px;
+}
+
+/* Country Selector */
+.country-selector {
+  display: flex;
+  gap: 10px;
+  background: #f5f5f5;
+  padding: 8px;
+  border-radius: 12px;
+}
+
+.country-btn {
+  padding: 10px 20px;
+  border: none;
+  background: transparent;
+  color: #666;
+  font-weight: 600;
+  font-size: 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.country-btn:hover {
+  background: rgba(41, 98, 255, 0.1);
+  color: #2962FF;
+}
+
+.country-btn.active {
+  background: #2962FF;
+  color: white;
+  box-shadow: 0 2px 8px rgba(41, 98, 255, 0.3);
+}
+
+.current-country {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.country-flag {
+  font-size: 28px;
+}
+
+.country-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+}
+
+.no-movers-message {
+  text-align: center;
+  padding: 40px 20px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  margin: 20px 0;
+}
+
+.no-movers-message p {
+  margin: 0;
+  color: #666;
+  font-size: 16px;
+  font-weight: 500;
 }
 
 .indices-section,
@@ -266,12 +338,38 @@
 }
 
 /* Dark mode */
-.dark-mode .market-header h2 {
+.dark-mode .market-title-section h2 {
   color: #ffffff !important;
 }
 
-.dark-mode .market-header p {
+.dark-mode .market-title-section p {
   color: #b0b0b0 !important;
+}
+
+.dark-mode .country-selector {
+  background: #2a2a2a;
+}
+
+.dark-mode .country-btn {
+  color: #b0b0b0;
+}
+
+.dark-mode .country-btn:hover {
+  background: rgba(41, 98, 255, 0.2);
+  color: #5a8fff;
+}
+
+.dark-mode .country-btn.active {
+  background: #2962FF;
+  color: white;
+}
+
+.dark-mode .no-movers-message {
+  background: #2a2a2a;
+}
+
+.dark-mode .no-movers-message p {
+  color: #b0b0b0;
 }
 
 .dark-mode .indices-section h3,

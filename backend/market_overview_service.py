@@ -1,46 +1,138 @@
 """
-Market Overview Service
-Fetches market indices, top movers, and sector performance
+Market Overview Service - Multi-Country Support
+Fetches market indices, top movers, and sector performance for multiple countries
 """
 import requests
 import logging
-from typing import Dict, Optional
+from typing import Dict, Optional, List
+from datetime import datetime, timedelta
+import time
 
 logger = logging.getLogger(__name__)
 
 class MarketOverviewService:
-    """Fetch market overview data"""
+    """Fetch market overview data with multi-country support and caching"""
     
-    def get_market_overview(self) -> Optional[Dict]:
-        """
-        Get comprehensive market overview
+    def __init__(self):
+        self.cache = {}
+        self.cache_duration = 300  # 5 minutes cache
         
+        # Country configurations
+        self.countries = {
+            'US': {
+                'name': 'United States',
+                'indices': [
+                    ('^GSPC', 'S&P 500'),
+                    ('^IXIC', 'NASDAQ'),
+                    ('^DJI', 'Dow Jones')
+                ],
+                'popular_stocks': [
+                    'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'TSLA', 'META', 'AMD',
+                    'NFLX', 'DIS', 'BA', 'INTC', 'PYPL', 'COIN', 'UBER', 'ABNB',
+                    'SHOP', 'SQ', 'SNAP', 'PINS', 'ROKU', 'ZM', 'DOCU', 'TWLO',
+                    'CRM', 'ORCL', 'CSCO', 'ADBE', 'QCOM', 'TXN'
+                ],
+                'sectors': [
+                    ('XLK', 'Technology'),
+                    ('XLF', 'Financials'),
+                    ('XLV', 'Healthcare'),
+                    ('XLE', 'Energy'),
+                    ('XLI', 'Industrials'),
+                    ('XLY', 'Consumer Discretionary'),
+                    ('XLP', 'Consumer Staples'),
+                    ('XLB', 'Materials'),
+                    ('XLRE', 'Real Estate'),
+                    ('XLU', 'Utilities')
+                ]
+            },
+            'IN': {
+                'name': 'India',
+                'indices': [
+                    ('^NSEI', 'NIFTY 50'),
+                    ('^BSESN', 'SENSEX'),
+                    ('^NSEBANK', 'BANK NIFTY')
+                ],
+                'popular_stocks': [
+                    'RELIANCE.NS', 'TCS.NS', 'HDFCBANK.NS', 'INFY.NS', 'HINDUNILVR.NS',
+                    'ICICIBANK.NS', 'SBIN.NS', 'BHARTIARTL.NS', 'ITC.NS', 'KOTAKBANK.NS',
+                    'LT.NS', 'AXISBANK.NS', 'ASIANPAINT.NS', 'MARUTI.NS', 'TITAN.NS',
+                    'BAJFINANCE.NS', 'HCLTECH.NS', 'WIPRO.NS', 'ULTRACEMCO.NS', 'NESTLEIND.NS',
+                    'ADANIENT.NS', 'TATAMOTORS.NS', 'POWERGRID.NS', 'NTPC.NS', 'ONGC.NS'
+                ],
+                'sectors': []
+            },
+            'UK': {
+                'name': 'United Kingdom',
+                'indices': [
+                    ('^FTSE', 'FTSE 100'),
+                    ('^FTMC', 'FTSE 250'),
+                    ('^FTAI', 'FTSE All-Share')
+                ],
+                'popular_stocks': [
+                    'SHEL.L', 'AZN.L', 'HSBA.L', 'ULVR.L', 'DGE.L', 'BP.L',
+                    'GSK.L', 'RIO.L', 'LSEG.L', 'NG.L', 'BARC.L', 'LLOY.L',
+                    'VOD.L', 'PRU.L', 'BT-A.L', 'TSCO.L', 'AAL.L', 'IMB.L',
+                    'BATS.L', 'CRH.L', 'REL.L', 'EXPN.L', 'STAN.L', 'GLEN.L'
+                ],
+                'sectors': []
+            }
+        }
+    
+    def get_market_overview(self, country: str = 'US') -> Optional[Dict]:
+        """
+        Get comprehensive market overview for a specific country
+        
+        Args:
+            country: Country code (US, IN, UK)
+            
         Returns:
             Dict with indices, movers, and sectors
         """
+        # Check cache first
+        cache_key = f"market_overview_{country}"
+        if cache_key in self.cache:
+            cached_data, cached_time = self.cache[cache_key]
+            if time.time() - cached_time < self.cache_duration:
+                logger.info(f"Returning cached data for {country}")
+                return cached_data
+        
         try:
-            indices = self._get_major_indices()
-            movers = self._get_top_movers()
-            sectors = self._get_sector_performance()
+            if country not in self.countries:
+                country = 'US'  # Default to US
             
-            return {
+            config = self.countries[country]
+            
+            indices = self._get_major_indices(config['indices'])
+            movers = self._get_top_movers(config['popular_stocks'])
+            sectors = self._get_sector_performance(config['sectors']) if config['sectors'] else []
+            
+            result = {
+                'country': country,
+                'country_name': config['name'],
                 'indices': indices,
                 'movers': movers,
-                'sectors': sectors
+                'sectors': sectors,
+                'timestamp': datetime.now().isoformat()
             }
             
+            # Cache the result
+            self.cache[cache_key] = (result, time.time())
+            
+            return result
+            
         except Exception as e:
-            logger.error(f"Error fetching market overview: {str(e)}")
+            logger.error(f"Error fetching market overview for {country}: {str(e)}")
             return None
     
-    def _get_major_indices(self):
-        """Get major market indices (S&P 500, NASDAQ, DOW)"""
-        indices_symbols = [
-            ('^GSPC', 'S&P 500'),
-            ('^IXIC', 'NASDAQ'),
-            ('^DJI', 'Dow Jones')
+    def get_available_countries(self) -> List[Dict]:
+        """Get list of available countries"""
+        return [
+            {'code': code, 'name': config['name']}
+            for code, config in self.countries.items()
         ]
-        
+    
+    def _get_major_indices(self, indices_symbols: List[tuple]):
+        """Get major market indices"""
         indices = []
         
         for symbol, name in indices_symbols:
@@ -56,11 +148,7 @@ class MarketOverviewService:
                 indices.append(index_data)
                 continue
             
-            logger.warning(f"Could not fetch data for {symbol} from any source")
-        
-        # Use fallback if no indices were fetched
-        if len(indices) == 0:
-            indices = self._get_fallback_indices()
+            logger.warning(f"Could not fetch data for {symbol}")
         
         return indices
     
@@ -70,7 +158,7 @@ class MarketOverviewService:
             url = f"https://query1.finance.yahoo.com/v8/finance/chart/{symbol}"
             params = {'interval': '1d', 'range': '1d'}
             headers = {
-                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
             }
             
             response = requests.get(url, params=params, headers=headers, timeout=10)
@@ -95,7 +183,7 @@ class MarketOverviewService:
                         'change_percent': round(change_percent, 2)
                     }
         except Exception as e:
-            logger.error(f"Error fetching {symbol} from chart API: {str(e)}")
+            logger.debug(f"Error fetching {symbol} from chart API: {str(e)}")
         
         return None
     
@@ -105,7 +193,7 @@ class MarketOverviewService:
             url = f"https://query1.finance.yahoo.com/v7/finance/quote"
             params = {'symbols': symbol}
             headers = {
-                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
             }
             
             response = requests.get(url, params=params, headers=headers, timeout=10)
@@ -131,122 +219,90 @@ class MarketOverviewService:
                                 'change_percent': round(change_percent, 2)
                             }
         except Exception as e:
-            logger.error(f"Error fetching {symbol} from quote API: {str(e)}")
+            logger.debug(f"Error fetching {symbol} from quote API: {str(e)}")
         
         return None
     
-    def _get_fallback_indices(self):
-        """Get fallback indices data"""
-        # Fallback: If no indices fetched, return recent data with note
-        if True:
-            logger.warning("No indices fetched, using recent market data")
-            from datetime import datetime
-            indices = [
-                {
-                    'symbol': '^GSPC', 
-                    'name': 'S&P 500', 
-                    'price': 5916.98, 
-                    'change': 22.44, 
-                    'change_percent': 0.38,
-                    'note': 'Recent data - Live feed temporarily unavailable'
-                },
-                {
-                    'symbol': '^IXIC', 
-                    'name': 'NASDAQ', 
-                    'price': 18987.47, 
-                    'change': 63.97, 
-                    'change_percent': 0.34,
-                    'note': 'Recent data - Live feed temporarily unavailable'
-                },
-                {
-                    'symbol': '^DJI', 
-                    'name': 'Dow Jones', 
-                    'price': 43958.19, 
-                    'change': 259.65, 
-                    'change_percent': 0.59,
-                    'note': 'Recent data - Live feed temporarily unavailable'
-                }
-            ]
-        
-        return indices
-    
-    def _get_top_movers(self):
+    def _get_top_movers(self, popular_tickers: List[str]):
         """Get top gainers and losers"""
         movers = {
             'gainers': [],
             'losers': []
         }
         
-        # Popular stocks to check for movers
-        popular_tickers = [
-            'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'TSLA', 'META', 'AMD', 
-            'NFLX', 'DIS', 'BA', 'INTC', 'PYPL', 'COIN', 'UBER', 'ABNB',
-            'SHOP', 'SQ', 'SNAP', 'PINS', 'ROKU', 'ZM', 'DOCU', 'TWLO'
-        ]
-        
         try:
             # Fetch real-time data for popular stocks
             all_stocks = []
             
-            for ticker in popular_tickers:
-                try:
-                    url = f"https://query1.finance.yahoo.com/v8/finance/chart/{ticker}"
-                    params = {'interval': '1d', 'range': '1d'}
-                    headers = {
-                        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
-                    }
-                    
-                    response = requests.get(url, params=params, headers=headers, timeout=5)
-                    
-                    if response.status_code == 200:
-                        data = response.json()
-                        result = data['chart']['result'][0]
-                        meta = result.get('meta', {})
-                        
-                        current_price = meta.get('regularMarketPrice')
-                        previous_close = meta.get('previousClose')
-                        long_name = meta.get('longName', ticker)
-                        
-                        if current_price and previous_close:
-                            change_percent = ((current_price - previous_close) / previous_close * 100)
-                            
-                            all_stocks.append({
-                                'ticker': ticker,
-                                'name': long_name,
-                                'price': current_price,
-                                'change_percent': change_percent
-                            })
-                except Exception as e:
-                    logger.debug(f"Error fetching {ticker}: {str(e)}")
-                    continue
+            # Use batch API for better performance
+            batch_size = 10
+            for i in range(0, len(popular_tickers), batch_size):
+                batch = popular_tickers[i:i+batch_size]
+                batch_stocks = self._fetch_batch_quotes(batch)
+                all_stocks.extend(batch_stocks)
+                time.sleep(0.1)  # Small delay to avoid rate limiting
             
             # Sort and get top 5 gainers and losers
             if all_stocks:
                 all_stocks.sort(key=lambda x: x['change_percent'], reverse=True)
                 movers['gainers'] = all_stocks[:5]
                 movers['losers'] = all_stocks[-5:][::-1]  # Reverse to show worst first
+                
+                logger.info(f"Found {len(all_stocks)} stocks, {len(movers['gainers'])} gainers, {len(movers['losers'])} losers")
+            else:
+                logger.warning("No movers data fetched")
             
         except Exception as e:
             logger.error(f"Error fetching movers: {str(e)}")
         
         return movers
     
-    def _get_sector_performance(self):
-        """Get sector performance"""
-        # Sector ETFs as proxies
-        sectors = [
-            ('XLK', 'Technology'),
-            ('XLF', 'Financials'),
-            ('XLV', 'Healthcare'),
-            ('XLE', 'Energy'),
-            ('XLI', 'Industrials'),
-            ('XLY', 'Consumer Discretionary'),
-            ('XLP', 'Consumer Staples'),
-            ('XLB', 'Materials'),
-            ('XLRE', 'Real Estate'),
-            ('XLU', 'Utilities')
-        ]
+    def _fetch_batch_quotes(self, tickers: List[str]) -> List[Dict]:
+        """Fetch quotes for multiple tickers in one request"""
+        stocks = []
         
+        try:
+            symbols = ','.join(tickers)
+            url = f"https://query1.finance.yahoo.com/v7/finance/quote"
+            params = {'symbols': symbols}
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            }
+            
+            response = requests.get(url, params=params, headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if 'quoteResponse' in data and 'result' in data['quoteResponse']:
+                    results = data['quoteResponse']['result']
+                    
+                    for quote in results:
+                        try:
+                            ticker = quote.get('symbol')
+                            current_price = quote.get('regularMarketPrice')
+                            previous_close = quote.get('regularMarketPreviousClose')
+                            long_name = quote.get('longName') or quote.get('shortName') or ticker
+                            
+                            if current_price and previous_close and current_price > 0 and previous_close > 0:
+                                change_percent = ((current_price - previous_close) / previous_close * 100)
+                                
+                                stocks.append({
+                                    'ticker': ticker,
+                                    'name': long_name,
+                                    'price': round(current_price, 2),
+                                    'change_percent': round(change_percent, 2)
+                                })
+                        except Exception as e:
+                            logger.debug(f"Error processing quote: {str(e)}")
+                            continue
+                            
+        except Exception as e:
+            logger.error(f"Error fetching batch quotes: {str(e)}")
+        
+        return stocks
+    
+    def _get_sector_performance(self, sectors: List[tuple]):
+        """Get sector performance"""
         sector_data = []
         
         for symbol, name in sectors:
@@ -254,7 +310,7 @@ class MarketOverviewService:
                 url = f"https://query1.finance.yahoo.com/v8/finance/chart/{symbol}"
                 params = {'interval': '1d', 'range': '1d'}
                 headers = {
-                    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
                 }
                 
                 response = requests.get(url, params=params, headers=headers, timeout=5)
@@ -277,7 +333,7 @@ class MarketOverviewService:
                         })
                         
             except Exception as e:
-                logger.error(f"Error fetching sector {symbol}: {str(e)}")
+                logger.debug(f"Error fetching sector {symbol}: {str(e)}")
                 continue
         
         return sector_data

@@ -146,9 +146,10 @@ def delete_alert(user_id, alert_id):
 
 @stock_bp.route('/api/market/overview', methods=['GET'])
 def get_market_overview():
-    """Get market overview data"""
+    """Get market overview data for a specific country"""
     try:
-        market_data = market_overview_service.get_market_overview()
+        country = request.args.get('country', 'US').upper()
+        market_data = market_overview_service.get_market_overview(country)
         
         if not market_data:
             return jsonify({'error': 'Market data not available'}), 404
@@ -157,6 +158,18 @@ def get_market_overview():
         
     except Exception as e:
         logger.error(f"Error fetching market overview: {str(e)}")
+        return jsonify({'error': 'Internal server error'}), 500
+
+
+@stock_bp.route('/api/market/countries', methods=['GET'])
+def get_available_countries():
+    """Get list of available countries for market data"""
+    try:
+        countries = market_overview_service.get_available_countries()
+        return jsonify({'countries': countries})
+        
+    except Exception as e:
+        logger.error(f"Error fetching countries: {str(e)}")
         return jsonify({'error': 'Internal server error'}), 500
 
 
